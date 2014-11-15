@@ -1,0 +1,5 @@
+<node id="{{ parent_node.id }}" title="{{ parent_node.title }}">
+  {% for child in parent_node.children %}
+    {% raw child.render(request_handler) %}
+  {% end %}
+</node>
