@@ -10,6 +10,7 @@
 
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, StaticFileHandler, Application, url
+import uimodules
 import sqlite3
 
 import sys
@@ -33,10 +34,6 @@ class Node:
         self.children = list()
     def append(self, node):
         self.children.append(node)
-    def render(self, request_handler):
-        return request_handler.render_string(
-                get_template('xml_render_node.part', 'xml'),
-                parent_node=self, request_handler=request_handler) 
 
 class XmlTreesHandler(RequestHandler):
     def get(self):
@@ -70,15 +67,16 @@ class XmlTreesHandler(RequestHandler):
                     all_nodes[parent_id].append(all_nodes[child_id])
            
         self.set_header("Content-type", 'text/xml; charset="utf-8"')
-        self.render(
-                get_template("xml_trees", "xml"),
-                trees=root_nodes, request_handler=self)
+        self.render(get_template("xml_trees", "xml"), trees=root_nodes)
 
 # Define tornado application
+settings = {
+    "ui_modules": uimodules,
+}
 application = Application([
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
     url(r'/static/(.*)', StaticFileHandler, {'path': STATIC_PATH}),
-])
+], **settings)
 
 if __name__ == "__main__":
     if len(sys.argv) != 1 and len(sys.argv) != 2:

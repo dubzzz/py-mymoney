@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <trees>
   {% for tree in trees %}
-    {% raw tree.render(request_handler) %}
+    {% module NodeModule(node=tree) %}
   {% end %}
 </trees>
