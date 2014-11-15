@@ -23,21 +23,15 @@ def generate_tables(db=DEFAULT_DB):
         
         # Drop tables if they exist
         c.execute('''DROP TABLE IF EXISTS node''')
-        c.execute('''DROP TABLE IF EXISTS node_hierarchy''')
         c.execute('''DROP TABLE IF EXISTS expense''')
         c.execute('''DROP TABLE IF EXISTS node_expense''')
         
         # Create tables
         c.execute('''CREATE TABLE IF NOT EXISTS node (
                         id INTEGER PRIMARY KEY,
-                        title TEXT NOT NULL)''')
-        c.execute('''CREATE TABLE IF NOT EXISTS node_hierarchy (
-                        id INTEGER PRIMARY KEY,
                         parent_id INTEGER,
-                        child_id INTEGER,
-                        FOREIGN KEY(parent_id) REFERENCES node(id),
-                        FOREIGN KEY(child_id) REFERENCES node(id),
-                        UNIQUE(child_id))''')
+                        title TEXT NOT NULL,
+                        FOREIGN KEY(parent_id) REFERENCES node(id))''')
         c.execute('''CREATE TABLE IF NOT EXISTS expense (
                         id INTEGER PRIMARY KEY,
                         title TEXT NOT NULL,
