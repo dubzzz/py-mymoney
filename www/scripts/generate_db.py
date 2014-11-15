@@ -25,6 +25,7 @@ def generate_tables(db=DEFAULT_DB):
         c.execute('''DROP TABLE IF EXISTS node''')
         c.execute('''DROP TABLE IF EXISTS node_hierarchy''')
         c.execute('''DROP TABLE IF EXISTS expense''')
+        c.execute('''DROP TABLE IF EXISTS node_expense''')
         
         # Create tables
         c.execute('''CREATE TABLE IF NOT EXISTS node (
@@ -39,10 +40,14 @@ def generate_tables(db=DEFAULT_DB):
                         UNIQUE(child_id))''')
         c.execute('''CREATE TABLE IF NOT EXISTS expense (
                         id INTEGER PRIMARY KEY,
-                        node_id INTEGER,
                         title TEXT NOT NULL,
                         date INTEGER NOT NULL,
-                        value REAL NOT NULL,
+                        value REAL NOT NULL)''')
+        c.execute('''CREATE TABLE IF NOT EXISTS node_expense (
+                        expense_id INTEGER,
+                        node_id INTEGER,
+                        PRIMARY KEY(expense_id, node_id),
+                        FOREIGN KEY(expense_id) REFERENCES expense(id),
                         FOREIGN KEY(node_id) REFERENCES node(id))''')
         
         # Commit the changes
