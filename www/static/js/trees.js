@@ -1,3 +1,5 @@
+var XML_NODE_UPDATE_URL = null;
+
 function escapeHtml(unsafe) {
 	return $('<div />').text(unsafe).html()
 }
@@ -18,6 +20,7 @@ function displayTree(node, domNode)
 	span.append(i);
 	var escaped_node_title = escapeHtml(node.attr("title"));
 	span.append(escaped_node_title);
+	span.attr("data-node-id", node.attr("id"));
 	addOnClickNode(span);
 	addOnDblClickNode(span);
 	li.append(span);
@@ -138,14 +141,18 @@ function editNodeValue(span)
 		span.append(node_logo);
 		var input = $("<input/>");
 		input.attr("type", "text");
-		input.attr("value", node_title);
 		input.attr("data-initial-value", escaped_node_title);
+		input.val(node_title);
 		input.keypress(function(event)
 		{
 			if (event.keyCode == 27)
 			{ // Esc
 				cancelEditNodeValue($(event.currentTarget).parent());
 				event.stopPropagation();
+			}
+			else if (event.keyCode == 13)
+			{ // Enter
+				ajaxSaveEditNodeValue($(event.currentTarget).parent());
 			}
 		});
 		span.append(input);
@@ -169,8 +176,9 @@ function cancelEditNodeValue(span)
 /**
  * AJAX query to retrieve and display the trees
  */
-function ajaxDisplayTrees(xmlUrl)
+function ajaxDisplayTrees(xmlUrl, xmlNodeUpdateUrl)
 {
+	XML_NODE_UPDATE_URL = xmlNodeUpdateUrl;
 	$.ajax({
 		type: "get",
 		url: xmlUrl,
@@ -179,6 +187,55 @@ function ajaxDisplayTrees(xmlUrl)
 		{
 			var trees = $(xml).find("trees").first();
 			displayTrees(trees.find("> node"), $("div.trees"));
+		}
+	});
+}
+
+/**
+ * AJAX query to save changes to a node
+ */
+function ajaxSaveEditNodeValue(span)
+{
+	if (! XML_NODE_UPDATE_URL)
+	{
+		alert("Unable to find the url");
+		return;
+	}
+	if (span.hasClass("data-ongoing-update"))
+	{
+		alert("There is already an update for this node");
+		return;
+	}
+	span.addClass("ongoing-update");
+	$.ajax({
+		type: "post",
+		url: XML_NODE_UPDATE_URL,
+		data:
+		{
+			id: span.attr("data-node-id"),
+			title: span.find("input").first().val(),
+		},
+		dataType: "xml",
+		success: function(xml)
+		{
+			var updated_node = $(xml).find("node").first();
+			var node_id = updated_node.attr("id");
+			var node_title = updated_node.attr("title");
+			var escaped_node_title = escapeHtml(node_title);
+
+			var updated_span = $("div.trees span[data-node-id=" + node_id + "]").first();
+			var node_logo = updated_span.children().first();
+			cancelEditNodeValue(updated_span);
+			updated_span.html("");
+			updated_span.append(node_logo);
+			updated_span.append(escaped_node_title);
+			updated_span.removeClass("ongoing-update");
+		},
+		error: function()
+		{
+			cancelEditNodeValue(span);
+			span.removeClass("ongoing-update");
+			alert("Unhandled exception");
 		}
 	});
 }

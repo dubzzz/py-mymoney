@@ -68,6 +68,46 @@ class ConfigureNodesHandler(RequestHandler):
            
         self.render(get_template("configure_nodes"), page="configure_nodes", trees=root_nodes)
 
+class XmlUpdateNodeHandler(RequestHandler):
+    def post(self):
+        r""" Update a given node with appropriate data
+        """
+        
+        self.set_header("Content-type", 'text/xml; charset="utf-8"')
+        
+        try:
+            node_id = self.request.arguments["id"][0]
+        except KeyError:
+            self.set_status(404)
+            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query</error>''')
+            return
+        try:
+            node_title = self.request.arguments["title"][0]
+        except KeyError:
+            self.set_status(404)
+            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query</error>''')
+            return
+
+        conn = sqlite3.connect(DEFAULT_DB)
+        with conn:
+            c = conn.cursor()
+            c.execute('''UPDATE node SET title=? WHERE id=?''', (node_title, node_id,))
+            c.execute('''SELECT id, title FROM node WHERE id=?''', (node_id,))
+            node_data = c.fetchone()
+            
+            if node_data is None:
+                self.set_status(404)
+                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unable to find node #%s</error>''' % (node_id,))
+                return
+
+            node_id = node_data[0]
+            node_title = node_data[1]
+            self.render(get_template("xml_update_node", "xml"), id=node_id, title=node_title)
+            return
+
+        self.set_status(404)
+        self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
+
 class XmlTreesHandler(RequestHandler):
     def get(self):
         r""" Render trees in an XML file
@@ -109,6 +149,7 @@ settings = {
 application = Application([
     url(r"/configure/nodes", ConfigureNodesHandler, name="configure_nodes"),
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
+    url(r"/xml/update/node\.xml", XmlUpdateNodeHandler, name="xml_update_node"),
     url(r'/static/(.*)', StaticFileHandler, {'path': STATIC_PATH}),
 ], **settings)
 

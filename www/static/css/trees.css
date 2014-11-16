@@ -70,3 +70,7 @@
     border: 1px solid #94a0b4;
     color: #000;
 }
+
+.trees li > span.ongoing-update {
+    background: #ddf;
+}
