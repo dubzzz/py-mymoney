@@ -8,9 +8,12 @@ function displayTree(node, domNode)
 	var i = $("<i/>");
 	i.addClass("glyphicon");
 	span.append(i);
-	span.append(node.attr("title"));
+	var escaped_node_title = $('<div/>').text(node.attr("title")).html();
+	span.append(escaped_node_title);
 	addOnClickNode(span);
+	addOnDblClickNode(span);
 	li.append(span);
+	li.addClass("node");
 	var children = node.find("> node");
 	if (children.length == 0)
 	{
@@ -22,6 +25,26 @@ function displayTree(node, domNode)
 	}
 	displayTrees(children, li);
 	domNode.append(li);
+	return li;
+}
+
+/**
+ * Display an editable node
+ */
+function displayEditNode(domNode)
+{
+	var li = $("<li/>");
+	var span = $("<span/>");
+	var input = $("<input/>");
+	var i = $("<i/>");
+	i.addClass("glyphicon");
+	i.addClass("glyphicon-edit");
+	span.append(i);
+	input.attr("type", "text");
+	span.append(input);
+	li.append(span);
+	domNode.append(li);
+	return li;
 }
 
 /**
@@ -29,15 +52,16 @@ function displayTree(node, domNode)
  */
 function displayTrees(nodes, domNode)
 {
-	if (nodes.length == 0)
-	{
-		return;
-	}
 	var ul = $("<ul/>")
 	nodes.each(function()
 	{
 		displayTree($(this), ul);
 	});
+	liEditNode = displayEditNode(ul);
+	if (nodes.length == 0)
+	{
+		liEditNode.hide();
+	}
 	domNode.append(ul);
 }
 
@@ -48,24 +72,78 @@ function addOnClickNode(span)
 {
 	span.on('click', function(e)
 	{
-		var children = $(this).parent().find("> ul > li");
-		if (children.length == 0)
+		// Nothing for input nodes
+		if ($(this).find("input").length == 1)
 		{
 			return;
 		}
+		
+		// Show/Hide children
+		var children = $(this).parent().find("> ul > li");
+		var num_nodes = $(this).parent().find("> ul > li.node").length;
 		if (children.is(":visible")) {
 			children.hide('fast');
-			$(this).attr('title', 'Expand this branch').find('> i')
-					.removeClass("glyphicon-folder-open")
-					.addClass("glyphicon-folder-close");
+			if (num_nodes > 0)
+			{
+				$(this).attr('title', 'Expand this branch').find('> i')
+						.removeClass("glyphicon-folder-open")
+						.addClass("glyphicon-folder-close");
+			}
 		} else {
 			children.show('fast');
-			$(this).attr('title', 'Hide this branch').find('> i')
-					.removeClass("glyphicon-folder-close")
-					.addClass("glyphicon-folder-open");
+			if (num_nodes > 0)
+			{
+				$(this).attr('title', 'Hide this branch').find('> i')
+						.removeClass("glyphicon-folder-close")
+						.addClass("glyphicon-folder-open");
+			}
 		}
+		
+		// Remove edit mode (onclick on different node)
+		$(".trees li.node > span > input").each(function()
+		{
+			cancelEditNodeValue($(this).parent());
+		});
 		e.stopPropagation();
 	});
+}
+function addOnDblClickNode(span)
+{
+	span.on('dblclick', function(e)
+	{
+		editNodeValue($(this));
+		e.stopPropagation();
+	});
+}
+
+/**
+ * Edit/Cancel edit on node
+ */
+function editNodeValue(span)
+{
+	if (span.find("input").length == 0)
+	{
+		var escaped_node_title = span.text();
+		var node_logo = span.children().first();
+		span.text("");
+		span.append(node_logo);
+		var input = $("<input/>");
+		input.attr("type", "text");
+		input.attr("value", escaped_node_title);
+		input.attr("data-initial-value", escaped_node_title);
+		span.append(input);
+	}
+}
+function cancelEditNodeValue(span)
+{
+	if (span.find("input").length == 1)
+	{
+		var escaped_node_title = span.find("input").first().attr("data-initial-value");
+		var node_logo = span.children().first();
+		span.html("");
+		span.append(node_logo);
+		span.append(escaped_node_title);
+	}
 }
 
 /**

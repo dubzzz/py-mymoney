@@ -7,6 +7,12 @@
     position: relative;
 }
 
+.trees li input {
+    border: 0;
+    width: 100px;
+
+}
+
 .trees li::before, .trees li::after {
     content: '';
     left: -20px;
@@ -43,7 +49,7 @@
     padding-right: 10px;
 }
 
-.trees li > span {
+.trees li.node > span {
     cursor: pointer;
 }
 
