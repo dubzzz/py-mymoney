@@ -1,3 +1,11 @@
+function escapeHtml(unsafe) {
+	return $('<div />').text(unsafe).html()
+}
+
+function unescapeHtml(safe) {
+	return $('<div />').html(safe).text();
+}
+
 /**
  * Display a tree given a xml root node
  */
@@ -8,7 +16,7 @@ function displayTree(node, domNode)
 	var i = $("<i/>");
 	i.addClass("glyphicon");
 	span.append(i);
-	var escaped_node_title = $('<div/>').text(node.attr("title")).html();
+	var escaped_node_title = escapeHtml(node.attr("title"));
 	span.append(escaped_node_title);
 	addOnClickNode(span);
 	addOnDblClickNode(span);
@@ -123,13 +131,14 @@ function editNodeValue(span)
 {
 	if (span.find("input").length == 0)
 	{
-		var escaped_node_title = span.text();
+		var node_title = span.text();
+		var escaped_node_title = escapeHtml(node_title);
 		var node_logo = span.children().first();
 		span.text("");
 		span.append(node_logo);
 		var input = $("<input/>");
 		input.attr("type", "text");
-		input.attr("value", escaped_node_title);
+		input.attr("value", node_title);
 		input.attr("data-initial-value", escaped_node_title);
 		input.keypress(function(event)
 		{
@@ -148,7 +157,8 @@ function cancelEditNodeValue(span)
 {
 	if (span.find("input").length == 1)
 	{
-		var escaped_node_title = span.find("input").first().attr("data-initial-value");
+		var node_title = span.find("input").first().attr("data-initial-value");
+		var escaped_node_title = escapeHtml(node_title);
 		var node_logo = span.children().first();
 		span.html("");
 		span.append(node_logo);
