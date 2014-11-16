@@ -53,6 +53,13 @@ function displayEditNode(domNode)
 	i.addClass("glyphicon-edit");
 	span.append(i);
 	input.attr("type", "text");
+	input.keypress(function(event)
+	{
+		if (event.keyCode == 13)
+		{ // Enter
+			ajaxSaveNewNodeValue($(event.currentTarget).parent());
+		}
+	});
 	span.append(input);
 	li.append(span);
 	domNode.append(li);
@@ -196,8 +203,9 @@ function cancelEditNodeValue(span)
 /**
  * AJAX query to retrieve and display the trees
  */
-function ajaxDisplayTrees(xmlUrl, xmlNodeUpdateUrl)
+function ajaxDisplayTrees(xmlUrl, xmlNodeAddUrl, xmlNodeUpdateUrl)
 {
+	XML_NODE_ADD_URL = xmlNodeAddUrl;
 	XML_NODE_UPDATE_URL = xmlNodeUpdateUrl;
 	$.ajax({
 		type: "get",
@@ -255,6 +263,42 @@ function ajaxSaveEditNodeValue(span)
 		{
 			cancelEditNodeValue(span);
 			span.removeClass("ongoing-update");
+			alert("Unhandled exception");
+		}
+	});
+}
+
+/**
+ * AJAX query to save new node
+ */
+function ajaxSaveNewNodeValue(span)
+{
+	if (! XML_NODE_ADD_URL)
+	{
+		alert("Unable to find the url");
+		return;
+	}
+	$.ajax({
+		type: "post",
+		url: XML_NODE_ADD_URL,
+		data:
+		{
+			parent_id: span.parent().parent().parent().find("span").first().attr("data-node-id"), // TODO system for root node
+			title: span.find("input").first().val(),
+		},
+		dataType: "xml",
+		success: function(xml)
+		{
+			var updated_node = $(xml).find("node").first();
+			var parent_id = updated_node.attr("parent_id");
+			var node_id = updated_node.attr("id");
+			var node_title = updated_node.attr("title");
+			var escaped_node_title = escapeHtml(node_title);
+
+			var parent_span = $("div.trees span[data-node-id=" + parent_id + "]").first();
+		},
+		error: function()
+		{
 			alert("Unhandled exception");
 		}
 	});

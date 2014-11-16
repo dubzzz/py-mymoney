@@ -68,6 +68,39 @@ class ConfigureNodesHandler(RequestHandler):
            
         self.render(get_template("configure_nodes"), page="configure_nodes", trees=root_nodes)
 
+class XmlAddNodeHandler(RequestHandler):
+    def post(self):
+        r""" Add a node with appropriate data
+        """
+        
+        self.set_header("Content-type", 'text/xml; charset="utf-8"')
+        
+        try:
+            parent_id = self.request.arguments["parent_id"][0]
+        except KeyError:
+            self.set_status(404)
+            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing parent_id</error>''')
+            return
+        try:
+            node_title = self.request.arguments["title"][0]
+        except KeyError:
+            self.set_status(404)
+            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing title</error>''')
+            return
+
+        conn = sqlite3.connect(DEFAULT_DB)
+        with conn:
+            c = conn.cursor()
+            c.execute('''INSERT INTO node (parent_id, title) VALUES (?, ?)''',
+                    (parent_id, node_title,))
+            node_id = c.lastrowid
+            self.render(get_template("xml_update_node", "xml"),
+                    id=node_id, title=node_title, parent_id=parent_id)
+            return
+
+        self.set_status(404)
+        self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
+
 class XmlUpdateNodeHandler(RequestHandler):
     def post(self):
         r""" Update a given node with appropriate data
@@ -79,13 +112,13 @@ class XmlUpdateNodeHandler(RequestHandler):
             node_id = self.request.arguments["id"][0]
         except KeyError:
             self.set_status(404)
-            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query</error>''')
+            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing id</error>''')
             return
         try:
             node_title = self.request.arguments["title"][0]
         except KeyError:
             self.set_status(404)
-            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query</error>''')
+            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing title</error>''')
             return
 
         conn = sqlite3.connect(DEFAULT_DB)
@@ -149,6 +182,7 @@ settings = {
 application = Application([
     url(r"/configure/nodes", ConfigureNodesHandler, name="configure_nodes"),
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
+    url(r"/xml/add/node\.xml", XmlAddNodeHandler, name="xml_add_node"),
     url(r"/xml/update/node\.xml", XmlUpdateNodeHandler, name="xml_update_node"),
     url(r'/static/(.*)', StaticFileHandler, {'path': STATIC_PATH}),
 ], **settings)
