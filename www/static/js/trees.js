@@ -131,6 +131,14 @@ function editNodeValue(span)
 		input.attr("type", "text");
 		input.attr("value", escaped_node_title);
 		input.attr("data-initial-value", escaped_node_title);
+		input.keypress(function(event)
+		{
+			if (event.keyCode == 27)
+			{ // Esc
+				cancelEditNodeValue($(event.currentTarget).parent());
+				event.stopPropagation();
+			}
+		});
 		span.append(input);
 	}
 }
