@@ -283,7 +283,7 @@ function ajaxSaveNewNodeValue(span)
 		url: XML_NODE_ADD_URL,
 		data:
 		{
-			parent_id: span.parent().parent().parent().find("span").first().attr("data-node-id"), // TODO system for root node
+			parent_id: span.parent().parent().parent().find("> span").first().attr("data-node-id"),
 			title: span.find("input").first().val(),
 		},
 		dataType: "xml",
@@ -294,8 +294,24 @@ function ajaxSaveNewNodeValue(span)
 			var node_id = updated_node.attr("id");
 			var node_title = updated_node.attr("title");
 			var escaped_node_title = escapeHtml(node_title);
-
-			var parent_dom = $("div.trees span[data-node-id=" + parent_id + "]").parent().find("ul").first();
+			
+			var parent_dom = undefined;
+			if (parent_id == "-1")
+			{
+				parent_dom = $("div.trees > ul").first();
+			}
+			else
+			{
+				var parent_li = $("div.trees span[data-node-id=" + parent_id + "]").parent();
+				if (parent_li.length == 0)
+				{
+					return;
+				}
+				var parent_i = parent_li.find("> span > i").first();
+				parent_i.removeClass("glyphicon-leaf");
+				parent_i.addClass("glyphicon-folder-open");
+				parent_dom = parent_li.find("ul").first();
+			}
 			displayTree($(xml).find("node").first(), parent_dom);
 		},
 		error: function()

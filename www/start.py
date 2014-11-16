@@ -78,9 +78,8 @@ class XmlAddNodeHandler(RequestHandler):
         try:
             parent_id = self.request.arguments["parent_id"][0]
         except KeyError:
-            self.set_status(404)
-            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing parent_id</error>''')
-            return
+            parent_id = None
+
         try:
             node_title = self.request.arguments["title"][0]
         except KeyError:
@@ -91,11 +90,16 @@ class XmlAddNodeHandler(RequestHandler):
         conn = sqlite3.connect(DEFAULT_DB)
         with conn:
             c = conn.cursor()
-            c.execute('''INSERT INTO node (parent_id, title) VALUES (?, ?)''',
-                    (parent_id, node_title,))
-            node_id = c.lastrowid
-            self.render(get_template("xml_update_node", "xml"),
-                    id=node_id, title=node_title, parent_id=parent_id)
+            if parent_id is None:
+                c.execute('''INSERT INTO node (title) VALUES (?)''', (node_title,))
+                node_id = c.lastrowid
+                self.render(get_template("xml_update_node", "xml"), id=node_id, title=node_title)
+            else:
+                c.execute('''INSERT INTO node (parent_id, title) VALUES (?, ?)''',
+                        (parent_id, node_title,))
+                node_id = c.lastrowid
+                self.render(get_template("xml_update_node", "xml"),
+                        id=node_id, title=node_title, parent_id=parent_id)
             return
 
         self.set_status(404)
