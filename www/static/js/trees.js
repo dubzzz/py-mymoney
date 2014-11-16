@@ -90,7 +90,7 @@ function displayEditNode(domNode)
 /**
  * Display trees given a list of xml root nodes
  */
-function displayTrees(nodes, domNode)
+function displayTrees(nodes, domNode, root=false)
 {
 	var ul = $("<ul/>")
 	nodes.each(function()
@@ -98,7 +98,7 @@ function displayTrees(nodes, domNode)
 		displayTree($(this), ul);
 	});
 	liEditNode = displayEditNode(ul);
-	if (nodes.length == 0)
+	if (! root && nodes.length == 0)
 	{
 		liEditNode.hide();
 	}
@@ -270,7 +270,7 @@ function ajaxDisplayTrees(xmlUrl, xmlNodeAddUrl, xmlNodeUpdateUrl)
 		success: function(xml)
 		{
 			var trees = $(xml).find("trees").first();
-			displayTrees(trees.find("> node"), $("div.trees"));
+			displayTrees(trees.find("> node"), $("div.trees"), true);
 		}
 	});
 }
