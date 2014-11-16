@@ -22,6 +22,7 @@ function displayTree(node, domNode)
 	span.append(escaped_node_title);
 	span.attr("data-node-id", node.attr("id"));
 	addOnClickNode(span);
+	addOnRightClickNode(span);
 	addOnDblClickNode(span);
 	li.append(span);
 	li.addClass("node");
@@ -116,6 +117,25 @@ function addOnClickNode(span)
 			cancelEditNodeValue($(this).parent());
 		});
 		e.stopPropagation();
+	});
+}
+function addOnRightClickNode(span)
+{
+	span.on('contextmenu', function(e)
+	{
+		if ($(this).find("input").length == 0)
+		{
+			// Remove edit mode (onclick on different node)
+			$(".trees li.node > span > input").each(function()
+			{
+				cancelEditNodeValue($(this).parent());
+			});
+			
+			editNodeValue($(this));
+		}
+		
+		e.stopPropagation();
+		return false;
 	});
 }
 function addOnDblClickNode(span)
