@@ -295,7 +295,8 @@ function ajaxSaveNewNodeValue(span)
 			var node_title = updated_node.attr("title");
 			var escaped_node_title = escapeHtml(node_title);
 
-			var parent_span = $("div.trees span[data-node-id=" + parent_id + "]").first();
+			var parent_dom = $("div.trees span[data-node-id=" + parent_id + "]").parent().find("ul").first();
+			displayTree($(xml).find("node").first(), parent_dom);
 		},
 		error: function()
 		{
