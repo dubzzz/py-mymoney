@@ -140,6 +140,8 @@ function editNodeValue(span)
 			}
 		});
 		span.append(input);
+		input.focus();
+		input.select();
 	}
 }
 function cancelEditNodeValue(span)
