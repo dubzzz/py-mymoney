@@ -8,6 +8,27 @@ function unescapeHtml(safe) {
 	return $('<div />').html(safe).text();
 }
 
+Array.prototype.sortNodes = function()
+{
+	this.sort(function(a, b)
+	{
+		if (a[0] == b[0])
+		{
+			return 0;
+		}
+		
+		if (a[0] != null && (b[0] == null || a[0] < b[0]))
+		{
+			return -1;
+		}
+		else
+		{
+			return 1;
+		}
+		return 0;
+	});
+}
+
 /**
  * Display a tree given a xml root node
  */
@@ -81,7 +102,42 @@ function displayTrees(nodes, domNode)
 	{
 		liEditNode.hide();
 	}
+	sortTree(ul);
 	domNode.append(ul);
+}
+
+/**
+ * Sort the tree nodes
+ */
+function sortTree(parent_ul)
+{
+	var nodes = parent_ul.find("> li");
+	var nodes_for_sort = new Array();
+	for (var i=0 ; i!=nodes.length ; i++)
+	{
+		nodes_for_sort[i] = [getNodeTitle($(nodes[i])), nodes[i]];
+	}
+	nodes_for_sort.sortNodes();
+	for (var i=0 ; i!=nodes_for_sort.length ; i++)
+	{
+		parent_ul.append(nodes_for_sort[i][1]);
+	}
+}
+function getNodeTitle(node_li)
+{
+	var span = node_li.find("> span");
+	if (! span.attr("data-node-id"))
+	{
+		return null;
+	}
+	else if (span.find("input").length == 0)
+	{
+		return span.text();
+	}
+	else
+	{
+		return span.find("input").first().attr("data-initial-value");
+	}
 }
 
 /**
@@ -258,6 +314,12 @@ function ajaxSaveEditNodeValue(span)
 			updated_span.append(node_logo);
 			updated_span.append(escaped_node_title);
 			updated_span.removeClass("ongoing-update");
+
+			sortTree(updated_span.parent().parent());
+			
+			var input = span.find("input");
+			input.focus();
+			input.val("");
 		},
 		error: function()
 		{
@@ -313,6 +375,11 @@ function ajaxSaveNewNodeValue(span)
 				parent_dom = parent_li.find("ul").first();
 			}
 			displayTree($(xml).find("node").first(), parent_dom);
+			sortTree(parent_dom);
+
+			var input = span.find("input");
+			input.focus();
+			input.val("");
 		},
 		error: function()
 		{
