@@ -1,0 +1,66 @@
+/* Source: http://jsfiddle.net/jhfrench/GpdgF/ */
+
+.trees li {
+    list-style-type: none;
+    margin: 0;
+    padding: 10px 5px 0 5px;
+    position: relative;
+}
+
+.trees li::before, .trees li::after {
+    content: '';
+    left: -20px;
+    position: absolute;
+    right: auto;
+}
+
+.trees li::before {
+    border-left: 1px solid #999;
+    bottom: 50px;
+    height: 100%;
+    top: 0;
+    width: 1px;
+}
+
+.trees li::after {
+    border-top: 1px solid #999;
+    height: 20px;
+    top: 25px;
+    width: 25px;
+}
+
+.trees li span {
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border: 1px solid #999;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 3px 8px;
+    text-decoration: none;
+}
+
+.trees li span i.glyphicon {
+    padding-right: 10px;
+}
+
+.trees li > span {
+    cursor: pointer;
+}
+
+.trees > ul {
+    padding-left: 0;
+}
+
+.trees > ul > li::before, .trees > ul > li::after {
+    border: 0;
+}
+
+.trees li:last-child::before {
+    height: 30px;
+}
+
+.trees li > span:hover, .trees li > span:hover + ul li span {
+    background: #eee;
+    border: 1px solid #94a0b4;
+    color: #000;
+}

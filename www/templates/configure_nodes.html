@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Configure nodes{% end %}
+{% block title_h1 %}Configure nodes{% end %}
+
+{% block additional_css_js %}
+
+<link rel="stylesheet" href="/static/css/trees.css">
+<script src="/static/js/trees.js"></script>
+
+{% end %}
+
+{% block content %}
+
+<div class="trees">
+  <!-- Filled thanks to AJAX requests -->
+</div>
+
+<script type="text/javascript">
+  ajaxDisplayTrees("{{ reverse_url('xml_trees') }}");
+</script>
+
+{% end %}

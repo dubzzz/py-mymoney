@@ -35,6 +35,39 @@ class Node:
     def append(self, node):
         self.children.append(node)
 
+class ConfigureNodesHandler(RequestHandler):
+    def get(self):
+        r""" Render trees giving the ability to change its architecture
+        """
+        
+        all_nodes = dict()
+        root_nodes = list()
+        conn = sqlite3.connect(DEFAULT_DB)
+        with conn:
+            c = conn.cursor()
+            c.execute('''SELECT id, parent_id, title FROM node''')
+            data_db = c.fetchall()
+            
+            # Initialize nodes list
+            for data_line in data_db:
+                child_id = data_line[0]
+                parent_id = data_line[1]
+                child_title = data_line[2]
+                
+                node = Node(child_id, child_title)
+                all_nodes[child_id] = node
+                if not parent_id:
+                    root_nodes.append(node)
+            
+            # Create relations
+            for data_line in data_db:
+                child_id = data_line[0]
+                parent_id = data_line[1]
+                if parent_id:
+                    all_nodes[parent_id].append(all_nodes[child_id])
+           
+        self.render(get_template("configure_nodes"), page="configure_nodes", trees=root_nodes)
+
 class XmlTreesHandler(RequestHandler):
     def get(self):
         r""" Render trees in an XML file
@@ -74,6 +107,7 @@ settings = {
     "ui_modules": uimodules,
 }
 application = Application([
+    url(r"/configure/nodes", ConfigureNodesHandler, name="configure_nodes"),
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
     url(r'/static/(.*)', StaticFileHandler, {'path': STATIC_PATH}),
 ], **settings)
