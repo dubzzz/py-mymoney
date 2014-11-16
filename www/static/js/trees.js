@@ -196,6 +196,10 @@ function addOnRightClickNode(span)
 			
 			editNodeValue($(this));
 		}
+		else
+		{
+			cancelEditNodeValue($(this));
+		}
 		
 		e.stopPropagation();
 		return false;
