@@ -81,7 +81,7 @@ class XmlAddNodeHandler(RequestHandler):
             parent_id = None
 
         try:
-            node_title = self.request.arguments["title"][0]
+            node_title = self.request.arguments["title"][0].decode('utf_8')
         except KeyError:
             self.set_status(404)
             self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing title</error>''')
@@ -119,7 +119,7 @@ class XmlUpdateNodeHandler(RequestHandler):
             self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing id</error>''')
             return
         try:
-            node_title = self.request.arguments["title"][0]
+            node_title = self.request.arguments["title"][0].decode('utf_8')
         except KeyError:
             self.set_status(404)
             self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing title</error>''')
