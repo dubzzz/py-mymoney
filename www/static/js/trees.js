@@ -1,4 +1,6 @@
+var XML_NODE_ADD_URL = null;
 var XML_NODE_UPDATE_URL = null;
+var XML_NODE_MOVE_URL = null;
 
 function escapeHtml(unsafe) {
 	return $('<div />').text(unsafe).html()
@@ -42,6 +44,18 @@ function displayTree(node, domNode)
 	var escaped_node_title = escapeHtml(node.attr("title"));
 	span.append(escaped_node_title);
 	span.attr("data-node-id", node.attr("id"));
+	span.draggable({
+		containment: ".trees",
+		revert : true,
+		zIndex: 999
+	});
+	span.droppable({
+		accept: 'span[data-node-id]',
+		drop: function(event, ui)
+		{
+			ajaxSaveMoveNode(ui.draggable, $(event.target));
+		}
+	});
 	addOnClickNode(span);
 	addOnRightClickNode(span);
 	addOnDblClickNode(span);
@@ -263,10 +277,11 @@ function cancelEditNodeValue(span)
 /**
  * AJAX query to retrieve and display the trees
  */
-function ajaxDisplayTrees(xmlUrl, xmlNodeAddUrl, xmlNodeUpdateUrl)
+function ajaxDisplayTrees(xmlUrl, xmlNodeAddUrl, xmlNodeUpdateUrl, xmlNodeMoveUrl)
 {
 	XML_NODE_ADD_URL = xmlNodeAddUrl;
 	XML_NODE_UPDATE_URL = xmlNodeUpdateUrl;
+	XML_NODE_MOVE_URL = xmlNodeMoveUrl;
 	$.ajax({
 		type: "get",
 		url: xmlUrl,
@@ -384,6 +399,35 @@ function ajaxSaveNewNodeValue(span)
 			var input = span.find("input");
 			input.focus();
 			input.val("");
+		},
+		error: function()
+		{
+			alert("Unhandled exception");
+		}
+	});
+}
+
+/**
+ * AJAX query to change node's father
+ */
+function ajaxSaveMoveNode(span_node, span_father)
+{
+	if (! XML_NODE_MOVE_URL)
+	{
+		alert("Unable to find the url");
+		return;
+	}
+	$.ajax({
+		type: "post",
+		url: XML_NODE_MOVE_URL,
+		data:
+		{
+			id: span_node.attr("data-node-id"),
+			parent_id: span_father.attr("data-node-id"),
+		},
+		dataType: "xml",
+		success: function(xml)
+		{
 		},
 		error: function()
 		{
