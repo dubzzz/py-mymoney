@@ -340,11 +340,11 @@ function ajaxSaveEditNodeValue(span)
 			input.focus();
 			input.val("");
 		},
-		error: function()
+		error: function(xhr)
 		{
 			cancelEditNodeValue(span);
 			span.removeClass("ongoing-update");
-			alert("Unhandled exception");
+			alert($(xhr.responseText).text());
 		}
 	});
 }
@@ -400,9 +400,9 @@ function ajaxSaveNewNodeValue(span)
 			input.focus();
 			input.val("");
 		},
-		error: function()
+		error: function(xhr)
 		{
-			alert("Unhandled exception");
+			alert($(xhr.responseText).text());
 		}
 	});
 }
@@ -448,10 +448,10 @@ function ajaxSaveMoveNode(span_node, span_father)
 			sortTree(parent_dom);
 			draggable_li.find("span").first().removeClass("ongoing-update");
 		},
-		error: function()
+		error: function(xhr)
 		{
 			span_node.removeClass("ongoing-update");
-			alert("Unhandled exception");
+			alert($(xhr.responseText).text());
 		}
 	});
 }
