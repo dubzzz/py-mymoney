@@ -417,6 +417,7 @@ function ajaxSaveMoveNode(span_node, span_father)
 		alert("Unable to find the url");
 		return;
 	}
+	span_node.addClass("ongoing-update");
 	$.ajax({
 		type: "post",
 		url: XML_NODE_MOVE_URL,
@@ -428,9 +429,28 @@ function ajaxSaveMoveNode(span_node, span_father)
 		dataType: "xml",
 		success: function(xml)
 		{
+			var updated_node = $(xml).find("node").first();
+			var parent_id = updated_node.attr("parent_id");
+			var node_id = updated_node.attr("id");
+			
+			var parent_li = $("div.trees span[data-node-id=" + parent_id + "]").parent();
+			if (parent_li.length == 0)
+			{
+				return;
+			}
+			var parent_i = parent_li.find("> span > i").first();
+			parent_i.removeClass("glyphicon-leaf");
+			parent_i.addClass("glyphicon-folder-open");
+			parent_dom = parent_li.find("ul").first();
+
+			var draggable_li = $("div.trees span[data-node-id=" + node_id + "]").parent();
+			parent_dom.append(draggable_li);
+			sortTree(parent_dom);
+			draggable_li.find("span").first().removeClass("ongoing-update");
 		},
 		error: function()
 		{
+			span_node.removeClass("ongoing-update");
 			alert("Unhandled exception");
 		}
 	});

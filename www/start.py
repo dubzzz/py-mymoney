@@ -76,13 +76,12 @@ class XmlAddNodeHandler(RequestHandler):
         self.set_header("Content-type", 'text/xml; charset="utf-8"')
         
         try:
-            parent_id = self.request.arguments["parent_id"][0]
-        except KeyError:
+            parent_id = int(self.request.arguments["parent_id"][0])
+        except (KeyError, IndexError, TypeError, ValueError) as e:
             parent_id = None
-
         try:
             node_title = self.request.arguments["title"][0].decode('utf_8')
-        except KeyError:
+        except (KeyError, IndexError) as e:
             self.set_status(404)
             self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing title</error>''')
             return
@@ -113,14 +112,14 @@ class XmlUpdateNodeHandler(RequestHandler):
         self.set_header("Content-type", 'text/xml; charset="utf-8"')
         
         try:
-            node_id = self.request.arguments["id"][0]
-        except KeyError:
+            node_id = int(self.request.arguments["id"][0])
+        except (KeyError, IndexError, TypeError, ValueError) as e:
             self.set_status(404)
             self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing id</error>''')
             return
         try:
             node_title = self.request.arguments["title"][0].decode('utf_8')
-        except KeyError:
+        except (KeyError, IndexError) as e:
             self.set_status(404)
             self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing title</error>''')
             return
@@ -134,12 +133,122 @@ class XmlUpdateNodeHandler(RequestHandler):
             
             if node_data is None:
                 self.set_status(404)
-                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unable to find node #%s</error>''' % (node_id,))
+                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unable to find node</error>''')
                 return
 
             node_id = node_data[0]
             node_title = node_data[1]
             self.render(get_template("xml_update_node", "xml"), id=node_id, title=node_title)
+            return
+
+        self.set_status(404)
+        self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
+
+def isInTree(tree, node_id):
+    if tree.id == node_id:
+        return True
+    for child in tree.children:
+        if isInTree(child, node_id):
+            return True
+    return False
+
+def getRootId(trees, node_id):
+    for root in trees:
+        if isInTree(root, node_id):
+            return root.id
+    return -1
+
+class XmlMoveNodeHandler(RequestHandler):
+    def post(self):
+        r"""
+        Move a given node to another parent
+        
+        Conditions:
+        - nodes are in the same tree
+        - new father is not a child of the node
+        """
+        
+        self.set_header("Content-type", 'text/xml; charset="utf-8"')
+        
+        try:
+            node_id = int(self.request.arguments["id"][0])
+        except (KeyError, IndexError, TypeError, ValueError) as e:
+            self.set_status(404)
+            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing id</error>''')
+            return
+        try:
+            parent_id = int(self.request.arguments["parent_id"][0])
+        except (KeyError, IndexError, TypeError, ValueError) as e:
+            self.set_status(404)
+            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing parent_id</error>''')
+            return
+
+        conn = sqlite3.connect(DEFAULT_DB)
+        with conn:
+            c = conn.cursor()
+
+            # Retrieve the full tree
+            # in order to check conditions
+            
+            all_nodes = dict()
+            root_nodes = list()
+            c.execute('''SELECT id, parent_id, title FROM node''')
+            data_db = c.fetchall()
+            
+            # Initialize nodes list
+            for data_line in data_db:
+                db_child_id = data_line[0]
+                db_parent_id = data_line[1]
+                
+                node = Node(db_child_id, None)
+                all_nodes[db_child_id] = node
+                if not db_parent_id:
+                    root_nodes.append(node)
+            
+            # Create relations
+            for data_line in data_db:
+                db_child_id = data_line[0]
+                db_parent_id = data_line[1]
+                if db_parent_id:
+                    all_nodes[db_parent_id].append(all_nodes[db_child_id])
+            
+            # Check conditions
+            
+            try:
+                all_nodes[parent_id]
+            except KeyError:
+                self.set_status(404)
+                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Forbidden move: unknown parent node</error>''')
+                return
+            try:
+                all_nodes[node_id]
+            except KeyError:
+                self.set_status(404)
+                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Forbidden move: unknown node</error>''')
+                return
+            
+            if isInTree(all_nodes[node_id], parent_id):
+                self.set_status(404)
+                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Forbidden move: unable to be a child of your own children</error>''')
+                return
+            
+            if getRootId(root_nodes, node_id) != getRootId(root_nodes, parent_id):
+                self.set_status(404)
+                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Forbidden move: unable to move from a tree to another one</error>''')
+                return
+            
+            c.execute('''UPDATE node SET parent_id=? WHERE id=?''', (parent_id, node_id,))
+            c.execute('''SELECT id, parent_id FROM node WHERE id=?''', (node_id,))
+            node_data = c.fetchone()
+            
+            if node_data is None:
+                self.set_status(404)
+                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unable to find node</error>''')
+                return
+
+            node_id = node_data[0]
+            node_parent_id = node_data[1]
+            self.render(get_template("xml_update_node", "xml"), id=node_id, parent_id=node_parent_id)
             return
 
         self.set_status(404)
@@ -188,6 +297,7 @@ application = Application([
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
     url(r"/xml/add/node\.xml", XmlAddNodeHandler, name="xml_add_node"),
     url(r"/xml/update/node\.xml", XmlUpdateNodeHandler, name="xml_update_node"),
+    url(r"/xml/move/node\.xml", XmlMoveNodeHandler, name="xml_move_node"),
     url(r'/static/(.*)', StaticFileHandler, {'path': STATIC_PATH}),
 ], **settings)
 
