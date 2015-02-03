@@ -25,6 +25,9 @@
             <li >
               <a href="#">Home <span class="glyphicon glyphicon-home"></span></a>
             </li>
+            <li {% if page == "add_expenses" %}class="active"{% end %}>
+              <a href="{{ reverse_url('add_expenses') }}">Add expenses <span class="glyphicon glyphicon-plus"></span></a>
+            </li>
             <li {% if page == "configure_nodes" %}class="active"{% end %}>
               <a href="{{ reverse_url('configure_nodes') }}">Configure nodes <span class="glyphicon glyphicon-wrench"></span></a>
             </li>
