@@ -1,0 +1,17 @@
+table#add_expenses_table tbody input {
+    border: 0;
+}
+
+table#add_expenses_table tbody input:invalid {
+    background-color: #ff9999;
+    box-shadow: 0 0 2px #ff0000;
+}
+
+table#add_expenses_table tbody input.date-button {
+    margin-left: 10px;
+}
+
+table#add_expenses_table tbody .glyphicon:not(:first-child) {
+    margin-left: 10px;
+}
+

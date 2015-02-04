@@ -3,8 +3,33 @@
 {% block title %}Add expenses{% end %}
 {% block title_h1 %}Add expenses{% end %}
 
+{% block additional_css_js %}
+
+<link rel="stylesheet" href="/static/css/add_expenses_table.css">
+<script src="/static/js/add_expenses_table.js"></script>
+
+{% end %}
+
 {% block content %}
 
-<div>{{ csrf_token }}</div>
+<div id="add_expenses">
+  <table class="table table-striped" id="add_expenses_table" data-token="{{ csrf_token }}">
+    <thead>
+      <tr>
+        <td>Date</td>
+        <td>Title</td>
+        <td>Categories</td>
+        <td></td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="4"><span class="glyphicon glyphicon-info-sign"></span> Please enable JavaScript to be able to add expenses</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script type="text/javascript">
+  initAddExpensesTable();
+</script>
 
 {% end %}
