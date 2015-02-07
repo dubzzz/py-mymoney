@@ -111,7 +111,7 @@ function appendExpense() {
 	price_input.attr("required", "");
 	price_input.attr("size", "10");
 	price_input.attr("type", "text");
-	price_input.attr("pattern", "[-+]?(\\d{1,3}(\\s\\d{3})*|\\d+)(\\.\\d{0,2})?"); // 1000.00, 1 000.00, 1000 are valids
+	price_input.attr("pattern", "[-+]?(\\d{1,3}([\\s,]\\d{3})*|\\d+)(\\.\\d{0,2})?"); // 1000.00, 1 000.00, 1000 are valids
 	price_input.attr("placeholder", "0.00");
 	price_input.keyup(reactOnExpenseChange);
 	price_input.focus(reactOnPriceFocus);
