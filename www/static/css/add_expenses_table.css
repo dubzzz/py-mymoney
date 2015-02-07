@@ -1,5 +1,7 @@
 table#add_expenses_table tbody input {
     border: 0;
+    line-height: 34px;
+    line-height: 1.42857143 \0;
 }
 
 table#add_expenses_table tbody input:invalid {
@@ -7,8 +9,24 @@ table#add_expenses_table tbody input:invalid {
     box-shadow: 0 0 2px #ff0000;
 }
 
-table#add_expenses_table tbody input.date-button {
+table#add_expenses_table tbody input:valid:focus {
+    box-shadow: 0 0 2px #428BCA;
+}
+
+table#add_expenses_table tbody input:valid:hover {
+    box-shadow: 0 0 2px #00ff00;
+}
+
+table#add_expenses_table tbody input.date-input {
     margin-left: 10px;
+}
+
+table#add_expenses_table tbody input.price-input {
+    text-align: right;
+}
+
+table#add_expenses_table tbody tr td:last-child {
+    vertical-align: middle;
 }
 
 table#add_expenses_table tbody .glyphicon:not(:first-child) {

@@ -6,15 +6,19 @@ function appendExpense() {
 	expense.attr("data-expense-identifier", LAST_EXPENSE_ID);
 	
 	var date_li = $("<td/>");
-	var date_button_desc = $("<span/>");
-	date_button_desc.addClass("glyphicon glyphicon-calendar");
-	var date_button = $("<input/>");
-	date_button.addClass("date-button");
-	date_button.attr("required", "");
-	date_button.attr("type", "text");
-	date_button.datepicker({dateFormat: "dd/mm/yy"});
-	date_li.append(date_button_desc);
-	date_li.append(date_button);
+	var date_input_desc = $("<span/>");
+	date_input_desc.addClass("glyphicon glyphicon-calendar");
+	var date_input = $("<input/>");
+	date_input.addClass("date-input");
+	date_input.attr("required", "");
+	date_input.attr("type", "date");
+	if (date_input[0].type == "text") //date type not supported (HTML5)
+	{
+		date_input.attr("placeholder", "dd/mm/yyyy");
+		date_input.datepicker({dateFormat: "dd/mm/yy"});
+	}
+	date_li.append(date_input_desc);
+	date_li.append(date_input);
 	expense.append(date_li);
 
 	var title_li = $("<td/>");
@@ -23,8 +27,20 @@ function appendExpense() {
 	title_input.attr("required", "");
 	title_input.attr("size", "50");
 	title_input.attr("type", "text");
+	title_input.attr("placeholder", "Short description of the expense");
 	title_li.append(title_input);
 	expense.append(title_li);
+	
+	var price_li = $("<td/>");
+	var price_input = $("<input/>");
+	price_input.addClass("price-input");
+	price_input.attr("required", "");
+	price_input.attr("size", "10");
+	price_input.attr("type", "text");
+	price_input.attr("pattern", "[-+]?\\d+(\\.\\d?\\d?)?");
+	price_input.attr("placeholder", "0.00");
+	price_li.append(price_input);
+	expense.append(price_li);
 
 	var categories_li = $("<td/>");
 	expense.append(categories_li);
