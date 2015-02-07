@@ -1,7 +1,79 @@
 var ADD_EXPENSES_TABLE = null;
 var LAST_EXPENSE_ID = 0;
 
+function isFilledExpense(expense) {
+	// Given an expense, return true is it is fully and correctly filled
+	
+	var date_input = expense.find("input.date-input");
+	if (date_input.length != 1
+				|| (date_input[0].type == "date" && ! date_input.val().match('^[[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$'))
+				|| (date_input[0].type == "text" && ! date_input.val().match('^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}$'))) {
+		return false;
+	}
+	
+	var title_input = expense.find("input.title-input");
+	if (title_input.length != 1 || title_input.val().length == 0) {
+		return false;
+	}
+	
+	var price_input = expense.find("input.price-input");
+	if (price_input.length != 1
+				|| ! price_input.val().match('^[-+]?(([0-9]{1,3}([, ][0-9]{3})*|[0-9]+)(.[0-9]?[0-9]?)?)$')
+				|| parseFloat(price_input.val().replace(' ', '').replace(',', '')) == 0) {
+		return false;
+	}
+	return true;
+}
+
+function reactOnExpenseChange() {
+	// Automaticcaly append expenses when the last line is fully filled
+	// Only the last line is checked
+	
+	var expense = $(this).parent().parent();
+	// expense is the last expense of the table is not equivalent to
+	// data-expense-identifier == LAST_EXPENSE_ID as the expense could have been deleted..
+	if (expense[0] == ADD_EXPENSES_TABLE.children().last()[0] && isFilledExpense(expense)) {
+		appendExpense();
+	}
+}
+
+function reactOnPriceFocusOut() {
+	// Automatically format the price on focus out action
+	
+	if (! $(this).val().match('^[-+]?(([0-9]{1,3}([, ][0-9]{3})*|[0-9]+)(.[0-9]?[0-9]?)?)$')) {
+		return false;
+	}
+	var price_value_str = $(this).val();
+	var price_value = parseFloat(price_value_str.replace(' ', '').replace(',', ''));
+	var price_value_new_str = price_value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+	var language = window.navigator.userLanguage || window.navigator.language;
+	if (language.toLowerCase() == 'fr' || language.toLowerCase() == 'fr-fr') {
+		price_value_new_str = price_value_new_str.replace(',', ' ');
+	}
+	if (price_value_str != price_value_new_str) {
+		$(this).val(price_value_new_str);
+	}
+}
+
+function reactOnPriceFocus() {
+	// Automatically format the price on focus in order to ease the modification
+	
+	if (! $(this).val().match('^[-+]?(([0-9]{1,3}([, ][0-9]{3})*|[0-9]+)(.[0-9]?[0-9]?)?)$')) {
+		return false;
+	}
+	var price_value_str = $(this).val();
+	var price_value = parseFloat(price_value_str.replace(' ', '').replace(',', ''));
+	var price_value_new_str = price_value.toFixed(2);
+	if (price_value_str != price_value_new_str) {
+		$(this).val(price_value_new_str);
+	}
+}
+
 function appendExpense() {
+	// Append an empty expense in the form
+	
+	LAST_EXPENSE_ID++;
 	var expense = $("<tr/>");
 	expense.attr("data-expense-identifier", LAST_EXPENSE_ID);
 	
@@ -17,6 +89,7 @@ function appendExpense() {
 		date_input.attr("placeholder", "dd/mm/yyyy");
 		date_input.datepicker({dateFormat: "dd/mm/yy"});
 	}
+	date_input.keyup(reactOnExpenseChange);
 	date_li.append(date_input_desc);
 	date_li.append(date_input);
 	expense.append(date_li);
@@ -28,6 +101,7 @@ function appendExpense() {
 	title_input.attr("size", "50");
 	title_input.attr("type", "text");
 	title_input.attr("placeholder", "Short description of the expense");
+	title_input.keyup(reactOnExpenseChange);
 	title_li.append(title_input);
 	expense.append(title_li);
 	
@@ -37,8 +111,11 @@ function appendExpense() {
 	price_input.attr("required", "");
 	price_input.attr("size", "10");
 	price_input.attr("type", "text");
-	price_input.attr("pattern", "[-+]?\\d+(\\.\\d?\\d?)?");
+	price_input.attr("pattern", "[-+]?(\\d{1,3}(\\s\\d{3})*|\\d+)(\\.\\d{0,2})?"); // 1000.00, 1 000.00, 1000 are valids
 	price_input.attr("placeholder", "0.00");
+	price_input.keyup(reactOnExpenseChange);
+	price_input.focus(reactOnPriceFocus);
+	price_input.focusout(reactOnPriceFocusOut);
 	price_li.append(price_input);
 	expense.append(price_li);
 
@@ -65,10 +142,11 @@ function appendExpense() {
 	expense.append(actions_li);
 
 	ADD_EXPENSES_TABLE.append(expense);
-	LAST_EXPENSE_ID++;
 }
 
 function initAddExpensesTable() {
+	// Initialize expenses table
+	
 	ADD_EXPENSES_TABLE = $('table#add_expenses_table tbody');
 	ADD_EXPENSES_TABLE.html("");
 	appendExpense();
