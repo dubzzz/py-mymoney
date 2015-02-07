@@ -15,14 +15,12 @@ import sqlite3
 
 import sys
 from os import path
-from os import urandom
 
 WWW_PATH = path.dirname(__file__)
 SCRIPT_PATH = path.join(WWW_PATH, "scripts/")
 TEMPLATE_PATH = path.join(WWW_PATH, "templates/")
 STATIC_PATH = path.join(WWW_PATH, "static/")
 
-from sessions import read_session, store_session
 sys.path.append(SCRIPT_PATH)
 from generate_db import DEFAULT_DB
 
@@ -42,9 +40,7 @@ class AddExpensesHandler(RequestHandler):
         r""" Display a form that gives the ability to add several expenses
         """
         
-        csrf_token = urandom(16).encode('hex')
-        store_session(self, 'csrf_token', csrf_token)
-        self.render(get_template("add_expenses"), page="add_expenses", csrf_token=csrf_token)
+        self.render(get_template("add_expenses"), page="add_expenses")
 
 class ConfigureNodesHandler(RequestHandler):
     def get(self):
