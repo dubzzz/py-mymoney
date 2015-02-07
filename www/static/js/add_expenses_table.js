@@ -125,6 +125,7 @@ function appendExpense() {
 		date_input.attr("placeholder", "dd/mm/yyyy");
 		date_input.datepicker({dateFormat: "dd/mm/yy"});
 	}
+	date_input.change(reactOnExpenseChange);
 	date_input.keyup(reactOnExpenseChange);
 	date_td.append(date_input_desc);
 	date_td.append(date_input);
