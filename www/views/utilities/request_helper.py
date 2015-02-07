@@ -3,6 +3,23 @@
 from tornado.web import RequestHandler
 from tornado.escape import xhtml_escape
 
+class ForbiddenOperationException(Exception):
+    pass
+
+def donotpropagate_forbidden_operation(method):
+    r"""
+    Decorate a post or get method for RequestHandler
+    Catch all exceptions of type ForbiddenOperationException
+    @decorator
+    """
+
+    def inner(*args, **kwargs):
+        try:
+            return method(*args, **kwargs)
+        except ForbiddenOperationException:
+            return
+    return inner
+
 def xmlcontent(method):
     r"""
     Decorate a post or get method for RequestHandler
@@ -31,8 +48,13 @@ def raise404(request_handler, message):
         The handler that should launch the 404 error
     message: str
         The message to insert into the xml. This message will be automatically escaped
+    
+    Raise
+    -----
+    ForbiddenOperationException: always
     """
 
     request_handler.set_status(404)
     request_handler.finish('<?xml version="1.0" encoding="UTF-8"?><error>%s</error>' % (xhtml_escape(message),))
+    raise ForbiddenOperationException(message)
 
