@@ -19,7 +19,7 @@ function isFilledExpense(expense) {
 	var price_input = expense.find("input.price-input");
 	if (price_input.length != 1
 				|| ! price_input.val().match('^[-+]?(([0-9]{1,3}([, ][0-9]{3})*|[0-9]+)(.[0-9]?[0-9]?)?)$')
-				|| parseFloat(price_input.val().replace(' ', '').replace(',', '')) == 0) {
+				|| parseFloat(price_input.val().replace(/ /g, '').replace(/,/g, '')) == 0) {
 		return false;
 	}
 	return true;
@@ -44,12 +44,12 @@ function reactOnPriceFocusOut() {
 		return false;
 	}
 	var price_value_str = $(this).val();
-	var price_value = parseFloat(price_value_str.replace(' ', '').replace(',', ''));
+	var price_value = parseFloat(price_value_str.replace(/ /g, '').replace(/,/g, ''));
 	var price_value_new_str = price_value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
 	var language = window.navigator.userLanguage || window.navigator.language;
 	if (language.toLowerCase() == 'fr' || language.toLowerCase() == 'fr-fr') {
-		price_value_new_str = price_value_new_str.replace(',', ' ');
+		price_value_new_str = price_value_new_str.replace(/,/g, ' ');
 	}
 	if (price_value_str != price_value_new_str) {
 		$(this).val(price_value_new_str);
@@ -63,7 +63,7 @@ function reactOnPriceFocus() {
 		return false;
 	}
 	var price_value_str = $(this).val();
-	var price_value = parseFloat(price_value_str.replace(' ', '').replace(',', ''));
+	var price_value = parseFloat(price_value_str.replace(/ /g, '').replace(/,/g, ''));
 	var price_value_new_str = price_value.toFixed(2);
 	if (price_value_str != price_value_new_str) {
 		$(this).val(price_value_new_str);
