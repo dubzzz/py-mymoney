@@ -25,7 +25,6 @@ def generate_tables(db=DEFAULT_DB):
         c.execute('''DROP TABLE IF EXISTS node''')
         c.execute('''DROP TABLE IF EXISTS expense''')
         c.execute('''DROP TABLE IF EXISTS node_expense''')
-        c.execute('''DROP TABLE IF EXISTS sessions''')
         
         # Create tables
         c.execute('''CREATE TABLE IF NOT EXISTS node (
@@ -44,12 +43,6 @@ def generate_tables(db=DEFAULT_DB):
                         PRIMARY KEY(expense_id, node_id),
                         FOREIGN KEY(expense_id) REFERENCES expense(id),
                         FOREIGN KEY(node_id) REFERENCES node(id))''')
-        c.execute('''CREATE TABLE IF NOT EXISTS sessions (
-                        ip TEXT NOT NULL,
-                        key TEXT NOT NULL,
-                        expiry_datetime INTEGER NOT NULL,
-                        value TEXT,
-                        PRIMARY KEY(ip, key))''')
         
         # Commit the changes
         conn.commit()
