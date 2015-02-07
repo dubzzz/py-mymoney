@@ -12,6 +12,7 @@ sys.path.append(path.join(__CURRENT_PATH, "..", "scripts"))
 from generate_db import DEFAULT_DB
 
 sys.path.append(path.join(__CURRENT_PATH, "utilities"))
+from request_helper import xmlcontent
 from trees import Node, isInTree, getRootId
 
 # HTML Webpages
@@ -54,6 +55,7 @@ class ConfigureNodesHandler(RequestHandler):
 # XML answers to AJAX queries
 
 class XmlAddNodeHandler(RequestHandler):
+    @xmlcontent
     def post(self):
         r"""
         Creation of a new node with appropriate data
@@ -63,8 +65,6 @@ class XmlAddNodeHandler(RequestHandler):
         - if a parent_id has been specified,
             - the parent is in the database
         """
-        
-        self.set_header("Content-type", 'text/xml; charset="utf-8"')
         
         try:
             parent_id = int(self.request.arguments["parent_id"][0])
@@ -100,6 +100,7 @@ class XmlAddNodeHandler(RequestHandler):
         self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
 
 class XmlUpdateNodeHandler(RequestHandler):
+    @xmlcontent
     def post(self):
         r"""
         Update a given node with appropriate data
@@ -108,8 +109,6 @@ class XmlUpdateNodeHandler(RequestHandler):
         ----------
         - node_id is in the database
         """
-        
-        self.set_header("Content-type", 'text/xml; charset="utf-8"')
         
         try:
             node_id = int(self.request.arguments["id"][0])
@@ -145,6 +144,7 @@ class XmlUpdateNodeHandler(RequestHandler):
         self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
 
 class XmlMoveNodeHandler(RequestHandler):
+    @xmlcontent
     def post(self):
         r"""
         Move a given node to another parent
@@ -155,8 +155,6 @@ class XmlMoveNodeHandler(RequestHandler):
         - nodes are in the same tree
         - new father is not a child of the node
         """
-        
-        self.set_header("Content-type", 'text/xml; charset="utf-8"')
         
         try:
             node_id = int(self.request.arguments["id"][0])
@@ -243,6 +241,7 @@ class XmlMoveNodeHandler(RequestHandler):
         self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
 
 class XmlTreesHandler(RequestHandler):
+    @xmlcontent
     def get(self):
         r"""
         Render trees in an XML file
@@ -274,6 +273,5 @@ class XmlTreesHandler(RequestHandler):
                 if parent_id:
                     all_nodes[parent_id].append(all_nodes[child_id])
            
-        self.set_header("Content-type", 'text/xml; charset="utf-8"')
         self.render("xml_trees.xml", trees=root_nodes)
 
