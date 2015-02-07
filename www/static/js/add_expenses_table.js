@@ -254,11 +254,18 @@ function ajaxSaveNewExpense()
 		{
 			expense.removeClass('expense-wait');
 			expense.addClass('expense-success');
+			setTimeout(function() {
+				expense.remove();
+			}, 3000);
 		},
 		error: function(xhr)
 		{
 			expense.removeClass("expense-wait");
 			expense.addClass('expense-fail');
+			setTimeout(function() {
+				expense.removeClass("expense-fail");
+				expense.addClass('expense-edit');
+			}, 3000);
 			alert($(xhr.responseText).text());
 		}
 	});
