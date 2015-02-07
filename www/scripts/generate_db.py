@@ -36,7 +36,7 @@ def generate_tables(db=DEFAULT_DB):
                         id INTEGER PRIMARY KEY,
                         title TEXT NOT NULL,
                         date INTEGER NOT NULL,
-                        value REAL NOT NULL)''')
+                        price REAL NOT NULL)''')
         c.execute('''CREATE TABLE IF NOT EXISTS node_expense (
                         expense_id INTEGER,
                         node_id INTEGER,
