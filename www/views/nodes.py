@@ -12,7 +12,7 @@ sys.path.append(path.join(__CURRENT_PATH, "..", "scripts"))
 from generate_db import DEFAULT_DB
 
 sys.path.append(path.join(__CURRENT_PATH, "utilities"))
-from request_helper import xmlcontent
+from request_helper import xmlcontent, raise404
 from trees import Node, isInTree, getRootId
 
 # HTML Webpages
@@ -73,9 +73,7 @@ class XmlAddNodeHandler(RequestHandler):
         try:
             node_title = self.request.arguments["title"][0].decode('utf_8')
         except (KeyError, IndexError) as e:
-            self.set_status(404)
-            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing title</error>''')
-            return
+            return raise404(self, 'Malformed query: missing title')
 
         conn = sqlite3.connect(DEFAULT_DB)
         with conn:
@@ -87,17 +85,14 @@ class XmlAddNodeHandler(RequestHandler):
             else:
                 c.execute('''SELECT id FROM node WHERE id=?''', (parent_id,))
                 if c.fetchone() == None:
-                    self.set_status(404)
-                    self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Parent node does not exist</error>''')
-                    return
+                    return raise404(self, 'Parent node does not exist')
                 c.execute('''INSERT INTO node (parent_id, title) VALUES (?, ?)''',
                         (parent_id, node_title,))
                 node_id = c.lastrowid
                 self.render("xml_update_node.xml", id=node_id, title=node_title, parent_id=parent_id)
             return
-
-        self.set_status(404)
-        self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
+        
+        return raise404(self, 'Unhandled exception')
 
 class XmlUpdateNodeHandler(RequestHandler):
     @xmlcontent
@@ -113,15 +108,11 @@ class XmlUpdateNodeHandler(RequestHandler):
         try:
             node_id = int(self.request.arguments["id"][0])
         except (KeyError, IndexError, TypeError, ValueError) as e:
-            self.set_status(404)
-            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing id</error>''')
-            return
+            return raise404(self, 'Malformed query: missing id')
         try:
             node_title = self.request.arguments["title"][0].decode('utf_8')
         except (KeyError, IndexError) as e:
-            self.set_status(404)
-            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing title</error>''')
-            return
+            return raise404(self, 'Malformed query: missing title')
 
         conn = sqlite3.connect(DEFAULT_DB)
         with conn:
@@ -131,17 +122,14 @@ class XmlUpdateNodeHandler(RequestHandler):
             node_data = c.fetchone()
             
             if node_data is None:
-                self.set_status(404)
-                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unable to find node</error>''')
-                return
+                return raise404(self, 'Unable to find node')
 
             node_id = node_data[0]
             node_title = node_data[1]
             self.render("xml_update_node.xml", id=node_id, title=node_title)
             return
-
-        self.set_status(404)
-        self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
+        
+        return raise404(self, 'Unhandled exception')
 
 class XmlMoveNodeHandler(RequestHandler):
     @xmlcontent
@@ -159,15 +147,11 @@ class XmlMoveNodeHandler(RequestHandler):
         try:
             node_id = int(self.request.arguments["id"][0])
         except (KeyError, IndexError, TypeError, ValueError) as e:
-            self.set_status(404)
-            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing id</error>''')
-            return
+            return raise404(self, 'Malformed query: missing id')
         try:
             parent_id = int(self.request.arguments["parent_id"][0])
         except (KeyError, IndexError, TypeError, ValueError) as e:
-            self.set_status(404)
-            self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Malformed query: missing parent_id</error>''')
-            return
+            return raise404(self, 'Malformed query: missing parent_id')
 
         conn = sqlite3.connect(DEFAULT_DB)
         with conn:
@@ -203,42 +187,31 @@ class XmlMoveNodeHandler(RequestHandler):
             try:
                 all_nodes[parent_id]
             except KeyError:
-                self.set_status(404)
-                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Forbidden move: unknown parent node</error>''')
-                return
+                return raise404(self, 'Forbidden move: unknown parent node')
             try:
                 all_nodes[node_id]
             except KeyError:
-                self.set_status(404)
-                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Forbidden move: unknown node</error>''')
-                return
+                return raise404(self, 'Forbidden move: unknown node')
             
             if isInTree(all_nodes[node_id], parent_id):
-                self.set_status(404)
-                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Forbidden move: unable to be a child of your own children</error>''')
-                return
+                return raise404(self, 'Forbidden move: unable to be a child of your own children')
             
             if getRootId(root_nodes, node_id) != getRootId(root_nodes, parent_id):
-                self.set_status(404)
-                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Forbidden move: unable to move from a tree to another one</error>''')
-                return
+                return raise404(self, 'Forbidden move: unable to move from a tree to another one')
             
             c.execute('''UPDATE node SET parent_id=? WHERE id=?''', (parent_id, node_id,))
             c.execute('''SELECT id, parent_id FROM node WHERE id=?''', (node_id,))
             node_data = c.fetchone()
             
             if node_data is None:
-                self.set_status(404)
-                self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unable to find node</error>''')
-                return
+                return raise404(self, 'Unable to find node')
 
             node_id = node_data[0]
             node_parent_id = node_data[1]
             self.render("xml_update_node.xml", id=node_id, parent_id=node_parent_id)
             return
 
-        self.set_status(404)
-        self.finish('''<?xml version="1.0" encoding="UTF-8"?><error>Unhandled exception</error>''')
+        return raise404(self, 'Unhandled exception')
 
 class XmlTreesHandler(RequestHandler):
     @xmlcontent

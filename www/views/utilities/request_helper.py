@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from tornado.web import RequestHandler
+from tornado.escape import xhtml_escape
 
 def xmlcontent(method):
     r"""
@@ -19,4 +20,19 @@ def xmlcontent(method):
             print("       \tArguments: %s, %s" % (args, kwargs,))
         return method(*args, **kwargs)
     return inner
+
+def raise404(request_handler, message):
+    r"""
+    Raise a 404 webpage
+
+    Parameters
+    ----------
+    request_handler: RequestHandler
+        The handler that should launch the 404 error
+    message: str
+        The message to insert into the xml. This message will be automatically escaped
+    """
+
+    request_handler.set_status(404)
+    request_handler.finish('<?xml version="1.0" encoding="UTF-8"?><error>%s</error>' % (xhtml_escape(message),))
 
