@@ -70,7 +70,7 @@ function displayTree(node, domNode)
 	{
 		i.addClass("glyphicon-folder-open");
 	}
-	displayTrees(children, li);
+	displayTrees(children, li, false);
 	domNode.append(li);
 	return li;
 }
@@ -104,7 +104,7 @@ function displayEditNode(domNode)
 /**
  * Display trees given a list of xml root nodes
  */
-function displayTrees(nodes, domNode, root=false)
+function displayTrees(nodes, domNode, root)
 {
 	var ul = $("<ul/>")
 	nodes.each(function()
