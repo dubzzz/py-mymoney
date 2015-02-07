@@ -50,6 +50,7 @@ class ConfigureNodesHandler(RequestHandler):
                 if parent_id:
                     all_nodes[parent_id].append(all_nodes[child_id])
            
+        self.xsrf_token
         self.render("configure_nodes.html", page="configure_nodes", trees=root_nodes)
 
 # XML answers to AJAX queries

@@ -315,6 +315,7 @@ function ajaxSaveEditNodeValue(span)
 		url: XML_NODE_UPDATE_URL,
 		data:
 		{
+			_xsrf: getCookie("_xsrf"),
 			id: span.attr("data-node-id"),
 			title: span.find("input").first().val(),
 		},
@@ -364,6 +365,7 @@ function ajaxSaveNewNodeValue(span)
 		url: XML_NODE_ADD_URL,
 		data:
 		{
+			_xsrf: getCookie("_xsrf"),
 			parent_id: span.parent().parent().parent().find("> span").first().attr("data-node-id"),
 			title: span.find("input").first().val(),
 		},
@@ -423,6 +425,7 @@ function ajaxSaveMoveNode(span_node, span_father)
 		url: XML_NODE_MOVE_URL,
 		data:
 		{
+			_xsrf: getCookie("_xsrf"),
 			id: span_node.attr("data-node-id"),
 			parent_id: span_father.attr("data-node-id"),
 		},

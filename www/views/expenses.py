@@ -24,6 +24,7 @@ class AddExpensesHandler(RequestHandler):
         Form to give the ability to add several expenses
         """
         
+        self.xsrf_token
         self.render("add_expenses.html", page="add_expenses")
 
 # XML answers to AJAX queries

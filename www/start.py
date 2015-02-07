@@ -26,6 +26,7 @@ from nodes import ConfigureNodesHandler, XmlTreesHandler, XmlAddNodeHandler, Xml
 settings = {
     "template_path": __TEMPLATES_ABSPATH,
     "ui_modules": uimodules,
+    "xsrf_cookies": True,
 }
 application = Application([
     url(r"/configure/nodes", ConfigureNodesHandler, name="configure_nodes"),

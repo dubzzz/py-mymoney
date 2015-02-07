@@ -220,6 +220,7 @@ function ajaxSaveNewExpense()
 		url: XML_EXPENSE_ADD_URL,
 		data:
 		{
+			_xsrf: getCookie("_xsrf"),
 			client_id: expense.attr('data-expense-identifier'),
 			title: expense_details['title'],
 			date: expense_details['date'],
