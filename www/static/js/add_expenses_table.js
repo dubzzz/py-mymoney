@@ -188,6 +188,28 @@ function initAddExpensesTable(addExpenseUrl) {
 	ADD_EXPENSES_TABLE = $('table#add_expenses_table tbody');
 	ADD_EXPENSES_TABLE.html("");
 	appendExpense();
+	$("button#submit-expenses").click(ajaxSaveAllExpenses);
+}
+
+/**
+ * AJAX query to save all expenses
+ */
+function ajaxSaveAllExpenses()
+{
+	if (! XML_EXPENSE_ADD_URL)
+	{
+		alert("Unable to find the url");
+		return;
+	}
+	
+	var expenses = ADD_EXPENSES_TABLE.find("tr");
+	for (var i = 0 ; i != expenses.length ; i++) {
+		var expense = $(expenses[i]);
+		var expense_details = isFilledExpense(expense);
+		if (expense_details && (expense.hasClass('expense-edit') || expense.hasClass('expense-fail'))) {
+			expense.find("span.glyphicon-ok").click();
+		}
+	}
 }
 
 /**
