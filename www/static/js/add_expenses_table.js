@@ -237,6 +237,7 @@ function reactOnCategoryKeyUp(event) {
 		autocomplete_list.addClass("autocomplete-list");
 		categories_td.append(autocomplete_list);
 	}
+	autocomplete_list.show();
 	var position_left = $(this).position()['left'];
 	var position_top = $(this).position()['top'] + $(this).height();
 	autocomplete_list.css('left', position_left + 'px');
@@ -295,6 +296,12 @@ function reactOnCategoryKeyUp(event) {
 		if (elts_to_display[i]['id'] == selected_elt_id) {
 			autocomplete_elt.addClass('autocomplete-list-selected');
 		}
+		autocomplete_elt.css("cursor", "pointer");
+		autocomplete_elt.click(function() {
+			appendCategory($(this).parent().parent(), $(this).attr("data-autocomplete-id"));
+			$(this).parent().parent().find("input.categories-input").val("");
+			$(this).parent().remove(); //remove list
+		});
 		autocomplete_elt.html(elts_to_display[i]['display']);
 		autocomplete_list.append(autocomplete_elt);
 	}
@@ -304,7 +311,7 @@ function reactOnCategoryKeyUp(event) {
 }
 
 function reactOnCategoryFocusOut() {
-	$(this).parent().find(".autocomplete-list").remove();
+	$(this).parent().find(".autocomplete-list").hide(400);
 }
 
 function appendExpense() {
