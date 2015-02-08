@@ -121,6 +121,10 @@ Array.prototype.sortOnBestScore = function() {
 	});
 }
 
+function toSafeHtml(text) {
+	return $("<a/>").text(text).html();
+}
+
 function computeAutocompletePriority(elt, query) {
 	var elt_text = elt['rawdisplay'];
 	var elt_text_lower = elt_text.toLowerCase();
@@ -158,19 +162,19 @@ function computeAutocompletePriority(elt, query) {
 		var new_elt = elt;
 		new_elt["score"] = best_score;
 		if (query.length == 0) {
-			new_elt['display'] = elt_text;
+			new_elt['display'] = toSafeHtml(elt_text);
 		} else {
 			new_elt['display'] = "";
 			var i = 0;
 			var query_pos = 0;
 			for ( ; i != elt_text_lower.length ; i++) {
 				if (i >= best_origin && query_pos != query_lower.length && elt_text_lower[i] == query_lower[query_pos]) {
-					new_elt['display'] += "<b>" + elt_text[i] + "</b>";
+					new_elt['display'] += "<b>" + toSafeHtml(elt_text[i]) + "</b>";
 					query_pos++;
 				}
 				else
 				{
-					new_elt['display'] += elt_text[i];
+					new_elt['display'] += toSafeHtml(elt_text[i]);
 				}
 			}
 		}
