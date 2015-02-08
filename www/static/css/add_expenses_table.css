@@ -45,6 +45,27 @@ table#add_expenses_table tbody .glyphicon:not(:first-child) {
     margin-left: 10px;
 }
 
+table#add_expenses_table tbody .categories-data ul.categories {
+    list-style-type: none;
+    padding: 0px;
+}
+
+table#add_expenses_table tbody .categories-data ul.categories li {
+    background-color: #428BCA;
+    padding: 0.2em 0.6em 0.3em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    color: #FFF;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25em;
+    display: inline-block;
+    margin-right: 5px;
+    margin-top: 5px;
+}
+
 ul.autocomplete-list {
     list-style-type: none;
     background-color: #ffffff;

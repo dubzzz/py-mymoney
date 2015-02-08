@@ -195,6 +195,36 @@ function computeAutocompleteResults(available_elts, query) {
 	return elts_to_display;
 }
 
+function appendCategory(categories_td, selected_elt_id) {
+	var i = 0;
+	for (i = 0 ; i != XML_TREES_ELTS.length ; i++) {
+		if (XML_TREES_ELTS[i]['id'] == selected_elt_id) {
+			break;
+		}
+	}
+	if (i != XML_TREES_ELTS.length) {
+		var categories_ul = categories_td.find("ul.categories");
+		if (categories_ul.length == 0) {
+			categories_ul = $("<ul/>");
+			categories_ul.addClass("categories");
+			categories_td.append(categories_ul);
+		}
+		var elt_dom = $("<li/>");
+		elt_dom.attr("data-id", XML_TREES_ELTS[i]['id']);
+		elt_dom.attr("title", XML_TREES_ELTS[i]['rawdisplay']);
+		elt_dom.css("cursor", "pointer");
+		elt_dom.html(toSafeHtml(XML_TREES_ELTS[i]['rawshortdisplay']) + " &times;");
+		elt_dom.click(function() {
+			var categories_ul = $(this).parent();
+			$(this).remove();
+			if (categories_ul.children().length == 0) {
+				categories_ul.remove();
+			}
+		});
+		categories_ul.append(elt_dom);
+	}
+}
+
 function reactOnCategoryKeyUp(event) {
 	// Refresh the content of the autocomplete list
 	
@@ -219,7 +249,9 @@ function reactOnCategoryKeyUp(event) {
 		selected_elt_id = parseInt(selected_elt.attr('data-autocomplete-id'));
 	}
 	if (selected_elt_id != -1 && event.keyCode == 13) { // Enter
-		//TODO
+		appendCategory(categories_td, selected_elt_id);
+		$(this).val("");
+		autocomplete_list.remove();
 		event.preventDefault();
 		return;
 	}
@@ -327,6 +359,7 @@ function appendExpense() {
 	expense.append(price_td);
 
 	var categories_td = $("<td/>");
+	categories_td.addClass("categories-data");
 	var categories_input = $("<input/>");
 	categories_input.addClass("categories-input");
 	categories_input.attr("type", "text");
@@ -378,7 +411,11 @@ function loadTrees(nodes) {
 		if (children.length > 0) {
 			loadTrees(children);
 		} else {
-			var elt = {rawdisplay: getTreeNodePath(node), id: node.attr("id")};
+			var elt = {
+					rawdisplay: getTreeNodePath(node),
+					rawshortdisplay: node.attr("title"),
+					id: node.attr("id")
+			};
 			XML_TREES_ELTS.push(elt);
 		}
 	}
