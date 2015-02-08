@@ -303,6 +303,14 @@ function reactOnCategoryKeyUp(event) {
 			$(this).parent().remove(); //remove list
 		});
 		autocomplete_elt.html(elts_to_display[i]['display']);
+		autocomplete_elt.mouseover(function() {
+			var autocomplete_list = $(this).parent();
+			var autocomplete_choices = autocomplete_list.children();
+			for (var i = 0 ; i != autocomplete_choices.length ; i++) {
+				$(autocomplete_choices[i]).removeClass('autocomplete-list-selected');
+			}
+			$(this).addClass('autocomplete-list-selected');
+		});
 		autocomplete_list.append(autocomplete_elt);
 	}
 	if (elts_to_display.length == 0) {
