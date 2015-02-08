@@ -39,6 +39,15 @@ function readExpensePrice(expense) {
 	return parseFloat(price_input.val().replace(/ /g, '').replace(/,/g, ''));
 }
 
+function readExpenseCategories(expense) {
+	var categories_elt = expense.find(".categories-data ul.categories li");
+	var categories = new Array();
+	for (var i = 0 ; i != categories_elt.length ; i++) {
+		categories.push($(categories_elt[i]).attr("data-id"));
+	}
+	return categories;
+}
+
 function isFilledExpense(expense) {
 	// Given an expense, return true is it is fully and correctly filled
 	
@@ -56,7 +65,15 @@ function isFilledExpense(expense) {
 	if (! expense_price) {
 		return undefined;
 	}
-	return {date: expense_date, title: expense_title, price: expense_price};
+
+	var expense_categories = readExpenseCategories(expense);
+
+	return {
+		date: expense_date,
+		title: expense_title,
+		price: expense_price,
+		categories: expense_categories
+	};
 }
 
 function reactOnExpenseChange() {
@@ -501,6 +518,11 @@ function ajaxSaveNewExpense()
 		alert("Please fill the expense before saving it");
 		return;
 	}
+
+	var categories = "";
+	for (var i = 0 ; i != expense_details["categories"].length ; i++) {
+		categories += "[" + expense_details["categories"][i] + "]";
+	}
 	
 	expense.removeClass('expense-edit');
 	expense.addClass('expense-wait');
@@ -514,6 +536,7 @@ function ajaxSaveNewExpense()
 			title: expense_details['title'],
 			date: expense_details['date'],
 			price: expense_details['price'],
+			categories: categories,
 		},
 		dataType: "xml",
 		success: function(xml)
