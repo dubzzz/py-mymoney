@@ -38,7 +38,7 @@ class DisplayExpensesHandler(RequestHandler):
         conn = sqlite3.connect(DEFAULT_DB)
         with conn:
             c = conn.cursor()
-            c.execute('''SELECT expense.id, expense.title, expense.date,
+            c.execute('''SELECT expense.id, expense.title, (expense.date-2440587.5)*86400.0 AS udate,
                                 expense.price, node_expense.node_id, node.title
                          FROM expense
                          LEFT OUTER JOIN node_expense
