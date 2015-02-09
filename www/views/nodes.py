@@ -24,15 +24,8 @@ class ConfigureNodesHandler(RequestHandler):
         give the ability for the user to change its architecture
         """
         
-        all_nodes = dict()
-        root_nodes = list()
-        conn = sqlite3.connect(DEFAULT_DB)
-        with conn:
-            c = conn.cursor()
-            all_nodes, root_nodes = retrieveTrees(c)
-           
         self.xsrf_token
-        self.render("configure_nodes.html", page="configure_nodes", trees=root_nodes)
+        self.render("configure_nodes.html", page="configure_nodes")
 
 # XML answers to AJAX queries
 
