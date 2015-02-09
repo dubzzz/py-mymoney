@@ -13,7 +13,7 @@ from generate_db import DEFAULT_DB
 
 sys.path.append(path.join(__CURRENT_PATH, "utilities"))
 from request_helper import xmlcontent, raise404, donotpropagate_forbidden_operation
-from trees import Node, isInTree, getRootId
+from trees import Node, isInTree, getRootId, retrieveTrees
 
 # HTML Webpages
 
@@ -29,26 +29,7 @@ class ConfigureNodesHandler(RequestHandler):
         conn = sqlite3.connect(DEFAULT_DB)
         with conn:
             c = conn.cursor()
-            c.execute('''SELECT id, parent_id, title FROM node''')
-            data_db = c.fetchall()
-            
-            # Initialize nodes list
-            for data_line in data_db:
-                child_id = data_line[0]
-                parent_id = data_line[1]
-                child_title = data_line[2]
-                
-                node = Node(child_id, child_title)
-                all_nodes[child_id] = node
-                if not parent_id:
-                    root_nodes.append(node)
-            
-            # Create relations
-            for data_line in data_db:
-                child_id = data_line[0]
-                parent_id = data_line[1]
-                if parent_id:
-                    all_nodes[parent_id].append(all_nodes[child_id])
+            all_nodes, root_nodes = retrieveTrees(c)
            
         self.xsrf_token
         self.render("configure_nodes.html", page="configure_nodes", trees=root_nodes)
@@ -162,27 +143,7 @@ class XmlMoveNodeHandler(RequestHandler):
             # Retrieve the full tree
             # in order to check conditions
             
-            all_nodes = dict()
-            root_nodes = list()
-            c.execute('''SELECT id, parent_id, title FROM node''')
-            data_db = c.fetchall()
-            
-            # Initialize nodes list
-            for data_line in data_db:
-                db_child_id = data_line[0]
-                db_parent_id = data_line[1]
-                
-                node = Node(db_child_id, None)
-                all_nodes[db_child_id] = node
-                if not db_parent_id:
-                    root_nodes.append(node)
-            
-            # Create relations
-            for data_line in data_db:
-                db_child_id = data_line[0]
-                db_parent_id = data_line[1]
-                if db_parent_id:
-                    all_nodes[db_parent_id].append(all_nodes[db_child_id])
+            all_nodes, root_nodes = retrieveTrees(c)
             
             # Check conditions
             
@@ -226,26 +187,7 @@ class XmlTreesHandler(RequestHandler):
         conn = sqlite3.connect(DEFAULT_DB)
         with conn:
             c = conn.cursor()
-            c.execute('''SELECT id, parent_id, title FROM node''')
-            data_db = c.fetchall()
-            
-            # Initialize nodes list
-            for data_line in data_db:
-                child_id = data_line[0]
-                parent_id = data_line[1]
-                child_title = data_line[2]
-                
-                node = Node(child_id, child_title)
-                all_nodes[child_id] = node
-                if not parent_id:
-                    root_nodes.append(node)
-            
-            # Create relations
-            for data_line in data_db:
-                child_id = data_line[0]
-                parent_id = data_line[1]
-                if parent_id:
-                    all_nodes[parent_id].append(all_nodes[child_id])
+            all_nodes, root_nodes = retrieveTrees(c)
            
         self.render("xml_trees.xml", trees=root_nodes)
 

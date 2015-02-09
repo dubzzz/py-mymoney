@@ -38,8 +38,9 @@ def generate_tables(db=DEFAULT_DB):
                         date INTEGER NOT NULL,
                         price REAL NOT NULL)''')
         c.execute('''CREATE TABLE IF NOT EXISTS node_expense (
-                        expense_id INTEGER,
-                        node_id INTEGER,
+                        expense_id INTEGER NOT NULL,
+                        node_id INTEGER NOT NULL,
+                        visible BOOLEAN NOT NULL,
                         PRIMARY KEY(expense_id, node_id),
                         FOREIGN KEY(expense_id) REFERENCES expense(id),
                         FOREIGN KEY(node_id) REFERENCES node(id))''')

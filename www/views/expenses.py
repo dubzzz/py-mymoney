@@ -15,6 +15,7 @@ from generate_db import DEFAULT_DB
 
 sys.path.append(path.join(__CURRENT_PATH, "utilities"))
 from request_helper import xmlcontent, raise404, donotpropagate_forbidden_operation
+from trees import getRootId, getPathToNodeFromTrees, retrieveTrees
 
 # HTML Webpages
 
@@ -35,6 +36,12 @@ class XmlAddExpenseHandler(RequestHandler):
     def post(self):
         r"""
         Add an expense to the database
+
+        Conditions
+        ----------
+        - category is a node
+        - category is a leaf node
+        - categories are from different trees
         """
         
         try:
@@ -68,12 +75,49 @@ class XmlAddExpenseHandler(RequestHandler):
             raise404(self, 'Malformed query: missing price')
         if expense_price == 0:
             raise404(self, 'Malformed query: price must be different from 0.')
+        
+        try:
+            expense_categories_str = self.request.arguments["categories"][0]
+        except (KeyError, IndexError) as e:
+            expense_categories_str = ""
+        m = re.match(r'^(\[\d+\])*$', expense_categories_str)
+        if not m:
+            raise404(self, 'Malformed query: categories list must follow the pattern (\\[\\d+\\])*')
+        expense_categories = [int(category_str) for category_str in re.findall(r'\[(\d+)\]', expense_categories_str)]
+        expense_parent_categories = list()
 
+        # Check categories
+        if len(expense_categories) != 0:
+            all_nodes = dict()
+            root_nodes = list()
+            conn = sqlite3.connect(DEFAULT_DB)
+            with conn:
+                c = conn.cursor()
+                all_nodes, root_nodes = retrieveTrees(c)
+            
+            root_ids = list()
+            for category in expense_categories:
+                if not category in all_nodes:
+                    raise404(self, 'Categories must be taken from databases nodes')
+                if len(all_nodes[category].children) != 0:
+                    raise404(self, 'Categories must be leaf nodes')
+                root_id = getRootId(root_nodes, category)
+                if root_id in root_ids:
+                     raise404(self, 'Categories must be taken from different trees')
+                expense_parent_categories += getPathToNodeFromTrees(root_nodes, category)[1:]
+        
+        # Save the expense into the database
         conn = sqlite3.connect(DEFAULT_DB)
         with conn:
             c = conn.cursor()
             c.execute('''INSERT INTO expense (title, date, price) VALUES (?, julianday(?), ?)''',
                     (expense_title, expense_date_str, expense_price,))
+            expense_id = c.lastrowid
+            c.executemany('''INSERT INTO node_expense (expense_id, node_id, visible) VALUES (?, ?, 1)''',
+                    [(expense_id, category,) for category in expense_categories])
+            c.executemany('''INSERT INTO node_expense (expense_id, node_id, visible) VALUES (?, ?, 0)''',
+                    [(expense_id, category,) for category in expense_parent_categories])
+
             self.render("xml_add_expense.xml", client_id=expense_client_id)
             return
         raise404(self, 'Unhandled exception')
