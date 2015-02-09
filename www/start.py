@@ -19,7 +19,7 @@ sys.path.append(path.join(__CURRENT_PATH, "views", "utilities"))
 import uimodules
 
 sys.path.append(path.join(__CURRENT_PATH, "views"))
-from expenses import AddExpensesHandler, XmlAddExpenseHandler, DisplayExpensesHandler
+from expenses import AddExpensesHandler, XmlAddExpenseHandler, XmlDeleteExpenseHandler, DisplayExpensesHandler
 from nodes import ConfigureNodesHandler, XmlTreesHandler, XmlAddNodeHandler, XmlUpdateNodeHandler, XmlMoveNodeHandler
 
 # Define tornado application
@@ -35,6 +35,7 @@ application = Application([
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
     url(r"/xml/add/expense\.xml", XmlAddExpenseHandler, name="xml_add_expense"),
     url(r"/xml/add/node\.xml", XmlAddNodeHandler, name="xml_add_node"),
+    url(r"/xml/delete/expense\.xml", XmlDeleteExpenseHandler, name="xml_delete_expense"),
     url(r"/xml/update/node\.xml", XmlUpdateNodeHandler, name="xml_update_node"),
     url(r"/xml/move/node\.xml", XmlMoveNodeHandler, name="xml_move_node"),
     url(r'/static/(.*)', StaticFileHandler, {'path': __STATIC_ABSPATH}),

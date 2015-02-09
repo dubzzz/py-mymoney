@@ -154,3 +154,27 @@ class XmlAddExpenseHandler(RequestHandler):
             return
         raise404(self, 'Unhandled exception')
 
+class XmlDeleteExpenseHandler(RequestHandler):
+    @xmlcontent
+    @donotpropagate_forbidden_operation
+    def post(self):
+        r"""
+        Delete an expense from the database
+        
+        Conditions
+        ----------
+        - no specific checks, only existing expenses will be destroyed
+        """
+        
+        try:
+            expense_id = int(self.request.arguments["expense_id"][0])
+        except (KeyError, IndexError, TypeError, ValueError) as e:
+            raise404(self, 'Malformed query: missing expense_id')
+
+        # Save the expense into the database
+        conn = sqlite3.connect(DEFAULT_DB)
+        with conn:
+            c = conn.cursor()
+            c.execute('''DELETE FROM expense WHERE id=?''', (expense_id,))
+            c.execute('''DELETE FROM node_expense WHERE expense_id=?''', (expense_id,))
+

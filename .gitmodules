@@ -1,3 +1,6 @@
 [submodule "www/static/jquery-ui"]
 	path = www/static/jquery-ui
 	url = https://github.com/jquery/jquery-ui
+[submodule "www/static/js-tools"]
+	path = www/static/js-tools
+	url = https://github.com/dubzzz/js-tools.git

@@ -12,37 +12,81 @@
 
 {% block content %}
 
-<div id="add_expenses">
-  <table class="table table-striped" id="add_expenses_table">
+<div id="display-expenses">
+  <table class="table table-striped sorted-table-hide-id" id="display-expenses-table">
     <thead>
       <tr>
-        <td>Date</td>
-        <td>Title</td>
-        <td>Price</td>
-        <td>Categories</td>
-        <td></td>
+        <th>#</th>
+        <th>Date</th>
+        <th>Title</th>
+        <th style="width: 100px;">Price</th>
+        <th>Categories</th>
+        <th style="width: 20px;"></th>
       </tr>
     </thead>
     <tbody>
-      {% for expense_id, expense in expenses.items() %}
-        <tr>
-          <td class='date-data'>{{ expense['date'] }}</td>
-          <td class='title-data'>{{ expense['title'] }}</td>
-          <td class='price-data'>{{ expense['price'] }}</td>
-          <td class='categories-data'>
-            <ul class="categories">
-              {% for category_id, category_name in expense['categories'].items() %}
-                {% if category_id %}
-                  <li data-id="{{ category_id }}">{{ category_name }}</li>
-                {% end %}
-              {% end %}
-            </ul>
-          </td>
-          <td></td>
-        </tr>
-      {% end %}
+       <tr><td colspan="6"><span class="glyphicon glyphicon-info-sign"></span> Please enable JavaScript to be able to see expenses</td></tr>
     </tbody>
   </table>
+  <script type="text/javascript">
+    function deleteExpense(expense_id) {
+      $.ajax({
+        type: "post",
+        url: "{{ reverse_url('xml_delete_expense') }}",
+        data:
+        {
+          _xsrf: getCookie("_xsrf"),
+          expense_id: expense_id,
+        },
+        dataType: "xml",
+        success: function(xml)
+        {
+          var position = $.inArray(expense_id, my_expenses_table_ids);
+          if (position != -1) {
+            my_expenses_table_ids.splice(position, 1);
+            my_expenses_table_data.splice(position, 1);
+            my_expenses_table.update(-1);
+          }
+        },
+        error: function(xhr)
+        {
+          alert($(xhr.responseText).text());
+        }
+      });
+    }
+
+    var my_expenses_table_type = [
+      {type: 'date', content: "date",},
+      {type: 'text', content: "html", order: true,},
+      {type: 'int', content: "price", unit: '€', align: "right",},
+      {type: 'text', content: 'html',},
+      {type: 'text', content: 'html',}
+    ];
+    var my_expenses_table_data = [
+      {% for expense_id, expense in expenses.items() %}
+      [
+        {{ expense['date'] }}, "{{ expense['title'] }}",
+        {{ expense['price'] }},
+        "<ul class=\"categories\">\
+          {% for category_id, category_name in expense['categories'].items() %}\
+            {% if category_id %}\
+              <li data-id=\"{{ category_id }}\">{{ category_name }}</li>\
+            {% end %}\
+          {% end %}\
+        </ul>",
+        "<a href=\"javascript:void(0)\" onclick=\"deleteExpense({{ expense_id }})\">\
+          <span class=\"glyphicon glyphicon-remove\"></span>\
+        </a>",
+      ],
+      {% end %}
+    ];
+    var my_expenses_table_ids = [{% for expense_id in expenses %}{{ expense_id }},{% end %}];
+
+    var my_expenses_table = new SortedTable(
+        $("#display-expenses-table")[0],
+        my_expenses_table_type, my_expenses_table_data);
+    my_expenses_table.init();
+  </script>
 </div>
 
 {% end %}
