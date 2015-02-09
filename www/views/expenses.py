@@ -28,6 +28,38 @@ class AddExpensesHandler(RequestHandler):
         self.xsrf_token
         self.render("add_expenses.html", page="add_expenses")
 
+class DisplayExpensesHandler(RequestHandler):
+    def get(self):
+        r"""
+        Table containing all the expenses already saved
+        """
+        
+        expenses = dict()
+        conn = sqlite3.connect(DEFAULT_DB)
+        with conn:
+            c = conn.cursor()
+            c.execute('''SELECT expense.id, expense.title, expense.date,
+                                expense.price, node_expense.node_id, node.title
+                         FROM expense
+                         LEFT OUTER JOIN node_expense
+                                ON expense.id = node_expense.expense_id
+                                AND node_expense.visible = 1
+                         LEFT OUTER JOIN node
+                                ON node_expense.node_id = node.id''')
+            data_db = c.fetchall()
+            for db_info in data_db:
+                if db_info[0] not in expenses:
+                     expenses[db_info[0]] = {
+                             'title': db_info[1],
+                             'date': db_info[2],
+                             'price': db_info[3],
+                             'categories': dict(),
+                     }
+                expenses[db_info[0]]["categories"][db_info[4]] = db_info[5]
+
+        self.xsrf_token
+        self.render("display_expenses.html", page="display_expenses", expenses=expenses)
+
 # XML answers to AJAX queries
 
 class XmlAddExpenseHandler(RequestHandler):

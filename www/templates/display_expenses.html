@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}My expenses{% end %}
+{% block title_h1 %}My expenses{% end %}
+
+{% block additional_css_js %}
+
+<link rel="stylesheet" href="/static/css/add_expenses_table.css">
+<script src="/static/js/add_expenses_table.js"></script>
+
+{% end %}
+
+{% block content %}
+
+<div id="add_expenses">
+  <table class="table table-striped" id="add_expenses_table">
+    <thead>
+      <tr>
+        <td>Date</td>
+        <td>Title</td>
+        <td>Price</td>
+        <td>Categories</td>
+        <td></td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for expense_id, expense in expenses.items() %}
+        <tr>
+          <td class='date-data'>{{ expense['date'] }}</td>
+          <td class='title-data'>{{ expense['title'] }}</td>
+          <td class='price-data'>{{ expense['price'] }}</td>
+          <td class='categories-data'>
+            <ul class="categories">
+              {% for category_id, category_name in expense['categories'].items() %}
+                {% if category_id %}
+                  <li data-id="{{ category_id }}">{{ category_name }}</li>
+                {% end %}
+              {% end %}
+            </ul>
+          </td>
+          <td></td>
+        </tr>
+      {% end %}
+    </tbody>
+  </table>
+</div>
+
+{% end %}
