@@ -41,7 +41,7 @@ function readExpensePrice(expense) {
 }
 
 function readExpenseCategories(expense) {
-	var categories_elt = expense.find(".categories-data ulautocomplete-selection li");
+	var categories_elt = expense.find(".categories-data ul.autocomplete-selection li");
 	var categories = new Array();
 	for (var i = 0 ; i != categories_elt.length ; i++) {
 		categories.push($(categories_elt[i]).attr("data-id"));
