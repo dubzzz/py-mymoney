@@ -66,20 +66,3 @@ ul.categories li {
     margin-top: 5px;
 }
 
-ul.autocomplete-list {
-    list-style-type: none;
-    background-color: #ffffff;
-    box-shadow: 0 0 2px #428BCA;
-    padding: 0px;
-    position: absolute;
-}
-
-ul.autocomplete-list li {
-    padding: 5px 15px 5px 15px;
-}
-
-ul.autocomplete-list li.autocomplete-list-selected {
-    color: #ffffff;
-    background-color: #428BCA;
-}
-

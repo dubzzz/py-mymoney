@@ -2,6 +2,7 @@ var XML_EXPENSE_ADD_URL = null;
 var ADD_EXPENSES_TABLE = null;
 var XML_TREES_ELTS = new Array();
 var LAST_EXPENSE_ID = 0;
+var unitializedCategories = new Array();
 
 function readExpenseDate(expense) {
 	var date_input = expense.find("input.date-input");
@@ -40,7 +41,7 @@ function readExpensePrice(expense) {
 }
 
 function readExpenseCategories(expense) {
-	var categories_elt = expense.find(".categories-data ul.categories li");
+	var categories_elt = expense.find(".categories-data ulautocomplete-selection li");
 	var categories = new Array();
 	for (var i = 0 ; i != categories_elt.length ; i++) {
 		categories.push($(categories_elt[i]).attr("data-id"));
@@ -123,222 +124,6 @@ function reactOnPriceFocus() {
 	}
 }
 
-Array.prototype.sortOnBestScore = function() {
-	this.sort(function(a, b){
-		if(a['score'] < b['score']){
-			return -1;
-		} else if(a['score'] > b['score']) {
-			return 1;
-		} else if (a['rawdisplay'] < b['rawdisplay']) {
-			return -1;
-		} else if (a['rawdisplay'] > b['rawdisplay']) {
-			return 1;
-		}
-		return 0;
-	});
-}
-
-function toSafeHtml(text) {
-	return $("<a/>").text(text).html();
-}
-
-function computeAutocompletePriority(elt, query) {
-	var elt_text = elt['rawdisplay'];
-	var elt_text_lower = elt_text.toLowerCase();
-	var query_lower = query.toLowerCase();
-	
-	var best_origin = -1;
-	var best_score = -1;
-	for (var i=0 ; i!=elt_text_lower.length ; i++) { // Look for a string starting from this element
-		if (query_lower.length == 0 || elt_text_lower[i] != query_lower[0]) {
-			continue;
-		}
-		var padding_pos = 0;
-		var query_pos = 0;
-		for (query_pos = 0 ; i+padding_pos != elt_text_lower.length && query_pos != query_lower.length ; padding_pos++) {
-			if (elt_text_lower[i+padding_pos] == query_lower[query_pos]) {
-				query_pos++;
-			}
-		}
-
-		// Is there a match?
-		// If so, is it better than current one?
-		if (query_pos == query_lower.length) {//match
-			if (best_score == -1 || best_score > padding_pos-query_pos) {
-				best_origin = i;
-				best_score = padding_pos-query_pos;
-				if (best_score == 0) {
-					break;
-				}
-			}
-		}
-	}
-
-	// Highlight match characteristics
-	if (best_score != -1) {
-		var new_elt = elt;
-		new_elt["score"] = best_score;
-		if (query.length == 0) {
-			new_elt['display'] = toSafeHtml(elt_text);
-		} else {
-			new_elt['display'] = "";
-			var i = 0;
-			var query_pos = 0;
-			for ( ; i != elt_text_lower.length ; i++) {
-				if (i >= best_origin && query_pos != query_lower.length && elt_text_lower[i] == query_lower[query_pos]) {
-					new_elt['display'] += "<b>" + toSafeHtml(elt_text[i]) + "</b>";
-					query_pos++;
-				}
-				else
-				{
-					new_elt['display'] += toSafeHtml(elt_text[i]);
-				}
-			}
-		}
-		return new_elt;
-	}
-	return undefined;
-}
-
-function computeAutocompleteResults(available_elts, query) {
-	var elts_to_display = new Array();
-	for (var i=0 ; i!=available_elts.length ; i++) {
-		var new_elt = computeAutocompletePriority(available_elts[i], query);
-		if (new_elt) {
-			elts_to_display.push(new_elt);
-		}
-	}
-	elts_to_display.sortOnBestScore();
-	return elts_to_display;
-}
-
-function appendCategory(categories_td, selected_elt_id) {
-	var i = 0;
-	for (i = 0 ; i != XML_TREES_ELTS.length ; i++) {
-		if (XML_TREES_ELTS[i]['id'] == selected_elt_id) {
-			break;
-		}
-	}
-	if (i != XML_TREES_ELTS.length) {
-		var categories_ul = categories_td.find("ul.categories");
-		if (categories_ul.length == 0) {
-			categories_ul = $("<ul/>");
-			categories_ul.addClass("categories");
-			categories_td.append(categories_ul);
-		}
-		var elt_dom = $("<li/>");
-		elt_dom.attr("data-id", XML_TREES_ELTS[i]['id']);
-		elt_dom.attr("title", XML_TREES_ELTS[i]['rawdisplay']);
-		elt_dom.css("cursor", "pointer");
-		elt_dom.html(toSafeHtml(XML_TREES_ELTS[i]['rawshortdisplay']) + " &times;");
-		elt_dom.click(function() {
-			var categories_ul = $(this).parent();
-			$(this).remove();
-			if (categories_ul.children().length == 0) {
-				categories_ul.remove();
-			}
-		});
-		categories_ul.append(elt_dom);
-	}
-}
-
-function reactOnCategoryKeyUp(event) {
-	// Refresh the content of the autocomplete list
-	
-	// Get autocomplete list or create it if not displayed
-	var categories_td = $(this).parent();
-	var autocomplete_list = categories_td.find(".autocomplete-list");
-	if (autocomplete_list.length == 0) {
-		categories_td.css('position', 'relative');
-		autocomplete_list = $("<ul/>");
-		autocomplete_list.addClass("autocomplete-list");
-		categories_td.append(autocomplete_list);
-	}
-	autocomplete_list.show();
-	var position_left = $(this).position()['left'];
-	var position_top = $(this).position()['top'] + $(this).height();
-	autocomplete_list.css('left', position_left + 'px');
-	autocomplete_list.css('top', position_top + 'px');
-	
-	// Get already selected elements position
-	var selected_elt = autocomplete_list.find('.autocomplete-list-selected').first();
-	var selected_elt_id = -1;
-	if (selected_elt.length == 1) {
-		selected_elt_id = parseInt(selected_elt.attr('data-autocomplete-id'));
-	}
-	if (selected_elt_id != -1 && event.keyCode == 13) { // Enter
-		appendCategory(categories_td, selected_elt_id);
-		$(this).val("");
-		autocomplete_list.remove();
-		event.preventDefault();
-		return;
-	}
-	else if (event.keyCode == 38 || event.keyCode == 40) { // Up or Down
-		var autocomplete_elts = autocomplete_list.children();
-		var current_index = 0;
-		for (current_index=0 ; current_index != autocomplete_elts.length ; current_index++) {
-			if ($(autocomplete_elts[current_index]).hasClass('autocomplete-list-selected')) {
-				break;
-			}
-		}
-		if (autocomplete_elts.length > 0) {
-			if (current_index == autocomplete_elts.length) {
-				$(autocomplete_elts[0]).addClass('autocomplete-list-selected');
-			} else if (event.keyCode == 38) {
-				if (current_index > 0) {
-					$(autocomplete_elts[current_index]).removeClass('autocomplete-list-selected');
-					$(autocomplete_elts[current_index -1]).addClass('autocomplete-list-selected');
-				}
-			} else if (event.keyCode == 40) {
-				if (current_index < autocomplete_elts.length -1) {
-					$(autocomplete_elts[current_index]).removeClass('autocomplete-list-selected');
-					$(autocomplete_elts[current_index +1]).addClass('autocomplete-list-selected');
-				}
-			}
-			event.preventDefault();
-			return;
-		}
-	} else if (event.keyCode == 27) {
-		autocomplete_list.remove();
-	}
-	
-	// Create autocomplete list
-	var elts_to_display = computeAutocompleteResults(XML_TREES_ELTS, $(this).val());
-	
-	// Display elements
-	autocomplete_list.empty();
-	for (var i=0 ; i != elts_to_display.length ; i++) {
-		var autocomplete_elt = $("<li/>");
-		autocomplete_elt.attr('data-autocomplete-id', elts_to_display[i]['id']);
-		if (elts_to_display[i]['id'] == selected_elt_id) {
-			autocomplete_elt.addClass('autocomplete-list-selected');
-		}
-		autocomplete_elt.css("cursor", "pointer");
-		autocomplete_elt.click(function() {
-			appendCategory($(this).parent().parent(), $(this).attr("data-autocomplete-id"));
-			$(this).parent().parent().find("input.categories-input").val("");
-			$(this).parent().remove(); //remove list
-		});
-		autocomplete_elt.html(elts_to_display[i]['display']);
-		autocomplete_elt.mouseover(function() {
-			var autocomplete_list = $(this).parent();
-			var autocomplete_choices = autocomplete_list.children();
-			for (var i = 0 ; i != autocomplete_choices.length ; i++) {
-				$(autocomplete_choices[i]).removeClass('autocomplete-list-selected');
-			}
-			$(this).addClass('autocomplete-list-selected');
-		});
-		autocomplete_list.append(autocomplete_elt);
-	}
-	if (elts_to_display.length == 0) {
-		autocomplete_list.remove();
-	}
-}
-
-function reactOnCategoryFocusOut() {
-	$(this).parent().find(".autocomplete-list").hide(400);
-}
-
 function appendExpense() {
 	// Append an empty expense in the form
 	
@@ -396,8 +181,11 @@ function appendExpense() {
 	categories_input.addClass("categories-input");
 	categories_input.attr("type", "text");
 	categories_input.attr("placeholder", "Classify expense");
-	categories_input.focusout(reactOnCategoryFocusOut);
-	categories_input.keyup(reactOnCategoryKeyUp);
+	var autocomp_categories = XML_TREES_ELTS;
+	var autocomp = new AutocompleteItem(categories_input, autocomp_categories);
+	if (autocomp_categories.length == 0) {
+		unitializedCategories.push(autocomp);
+	}
 	categories_td.append(categories_input);
 	expense.append(categories_td);
 
@@ -444,9 +232,9 @@ function loadTrees(nodes) {
 			loadTrees(children);
 		} else {
 			var elt = {
-					rawdisplay: getTreeNodePath(node),
-					rawshortdisplay: node.attr("title"),
-					id: node.attr("id")
+					autocomplete_rawdata_on: getTreeNodePath(node),
+					autocomplete_rawdata_after: node.attr("title"),
+					autocomplete_id: node.attr("id")
 			};
 			XML_TREES_ELTS.push(elt);
 		}
@@ -471,6 +259,10 @@ function initAddExpensesTable(addExpenseUrl, xmlTreeUrl) {
 			XML_TREES_ELTS = new Array();
 			var root_nodes = $(xml).find("trees").first().find("> node");
 			loadTrees(root_nodes);
+			for (var i = 0 ; i != unitializedCategories.length ; i++) {
+				unitializedCategories[i].updateList(XML_TREES_ELTS);
+			}
+			unitializedCategories = new Array();
 		}
 	});
 }
