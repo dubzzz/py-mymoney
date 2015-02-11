@@ -13,21 +13,23 @@
 {% block content %}
 
 <div id="display-expenses">
-  <table class="table table-striped sorted-table-hide-id" id="display-expenses-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Date</th>
-        <th>Title</th>
-        <th style="width: 100px;">Price</th>
-        <th>Categories</th>
-        <th style="width: 20px;"></th>
-      </tr>
-    </thead>
-    <tbody>
-       <tr><td colspan="6"><span class="glyphicon glyphicon-info-sign"></span> Please enable JavaScript to be able to see expenses</td></tr>
-    </tbody>
-  </table>
+  <div class="sorted-table sorted-table-hide-id" id="display-expenses-table">
+    <div class="sorted-table-header">
+      <div class="row">
+        <div>#</div>
+        <div class="col-md-2">Date</div>
+        <div class="col-md-4">Title</div>
+        <div class="col-md-2">Price</div>
+        <div class="col-md-3">Categories</div>
+        <div class="col-md-1"></div>
+      </div>
+    </div>
+    <div class="sorted-table-body">
+      <div class="row">
+        <span class="glyphicon glyphicon-info-sign"></span> Please enable JavaScript to be able to see expenses
+      </div>
+    </div>
+  </div>
   <script type="text/javascript">
     function deleteExpense(expense_id) {
       $.ajax({
@@ -60,7 +62,7 @@
       {type: 'text', content: "html", order: true,},
       {type: 'int', content: "price", unit: '€', align: "right",},
       {type: 'text', content: 'html',},
-      {type: 'text', content: 'html',}
+      {type: 'text', content: 'html', align: "right",}
     ];
     var my_expenses_table_data = [
       {% for expense_id, expense in expenses.items() %}
