@@ -1,6 +1,7 @@
 var XML_EXPENSE_ADD_URL = null;
 var ADD_EXPENSES_TABLE = null;
 var XML_TREES_ELTS = new Array();
+var AUTOCOMPLETE_TITLES = new Array();
 var LAST_EXPENSE_ID = 0;
 var unitializedCategories = new Array();
 
@@ -145,6 +146,10 @@ function reactOnSelectCategory($input, choice) {
 	$selection.append($elt_dom);
 }
 
+function reactOnSelectTitle($input, choice) {
+	$input.val(choice["autocomplete_rawdata_on"]);
+}
+
 function appendExpense() {
 	// Append an empty expense in the form
 	
@@ -179,6 +184,9 @@ function appendExpense() {
 	title_input.attr("type", "text");
 	title_input.attr("placeholder", "Short description of the expense");
 	title_input.keyup(reactOnExpenseChange);
+	var autocomp_title = new AutocompleteItem(title_input, AUTOCOMPLETE_TITLES);
+	autocomp_title.setAutomaticallyEraseValue(false);
+	autocomp_title.setOnSelectCallback(reactOnSelectTitle);
 	title_td.append(title_input);
 	expense.append(title_td);
 	
@@ -263,12 +271,13 @@ function loadTrees(nodes) {
 	}
 }
 
-function initAddExpensesTable(addExpenseUrl, xmlTreeUrl) {
+function initAddExpensesTable(addExpenseUrl, xmlTreeUrl, autocomplete_for_title) {
 	// Initialize expenses table
 	
 	XML_EXPENSE_ADD_URL = addExpenseUrl;	
 	ADD_EXPENSES_TABLE = $('table#add_expenses_table tbody');
 	ADD_EXPENSES_TABLE.html("");
+	AUTOCOMPLETE_TITLES = autocomplete_for_title;
 	appendExpense();
 	$("button#submit-expenses").click(ajaxSaveAllExpenses);
 

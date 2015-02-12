@@ -26,7 +26,16 @@ class AddExpensesHandler(RequestHandler):
         """
         
         self.xsrf_token
-        self.render("add_expenses.html", page="add_expenses")
+        
+        expenses = []
+        conn = sqlite3.connect(DEFAULT_DB)
+        with conn:
+            c = conn.cursor()
+            c.execute('''SELECT DISTINCT id, title FROM expense
+                         ORDER BY id DESC LIMIT 500''')
+            expenses = c.fetchall()
+
+        self.render("add_expenses.html", page="add_expenses", expenses=expenses)
 
 class DisplayExpensesHandler(RequestHandler):
     def get(self):

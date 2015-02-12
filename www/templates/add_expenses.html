@@ -33,7 +33,17 @@
 </div>
 
 <script type="text/javascript">
-  initAddExpensesTable("{{ reverse_url('xml_add_expense') }}", "{{ reverse_url('xml_trees') }}");
+  var autocomplete_for_title = [
+    {% for expense in expenses %}
+    {
+      autocomplete_id: {{ expense[0] }},
+      autocomplete_rawdata_on: "{{ expense[1] }}",
+    },
+    {% end %}
+  ];
+  initAddExpensesTable("{{ reverse_url('xml_add_expense') }}",
+      "{{ reverse_url('xml_trees') }}",
+      autocomplete_for_title);
 </script>
 
 {% end %}
