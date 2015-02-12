@@ -124,6 +124,27 @@ function reactOnPriceFocus() {
 	}
 }
 
+function reactOnSelectCategory($input, choice) {
+	var $selection = $input.parent().find("ul.autocomplete-selection");
+	if ($selection.length == 0) {
+		$selection = $("<ul/>");
+		$selection.addClass("autocomplete-selection");
+		$input.parent().append($selection);
+	}
+	var $elt_dom = $("<li/>");
+	$elt_dom.attr("data-id", choice['autocomplete_id']);
+	$elt_dom.attr("title", choice['autocomplete_rawdata_on']);
+	$elt_dom.html(toSafeHtml(choice['autocomplete_rawdata_after']) + " &times;");
+	$elt_dom.click(function() {
+		var $selection = $(this).parent();
+		$(this).remove();
+		if ($selection.children().length == 0) {
+			$selection.remove();
+		}
+	});
+	$selection.append($elt_dom);
+}
+
 function appendExpense() {
 	// Append an empty expense in the form
 	
@@ -183,6 +204,7 @@ function appendExpense() {
 	categories_input.attr("placeholder", "Classify expense");
 	var autocomp_categories = XML_TREES_ELTS;
 	var autocomp = new AutocompleteItem(categories_input, autocomp_categories);
+	autocomp.setOnSelectCallback(reactOnSelectCategory);
 	if (autocomp_categories.length == 0) {
 		unitializedCategories.push(autocomp);
 	}

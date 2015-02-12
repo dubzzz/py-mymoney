@@ -45,12 +45,18 @@ table#add_expenses_table tbody .glyphicon:not(:first-child) {
     margin-left: 10px;
 }
 
-ul.categories {
+ul.autocomplete-selection li {
+    cursor: pointer;
+}
+
+ul.categories,
+ul.autocomplete-selection {
     list-style-type: none;
     padding: 0px;
 }
 
-ul.categories li {
+ul.categories li,
+ul.autocomplete-selection li{
     background-color: #428BCA;
     padding: 0.2em 0.6em 0.3em;
     font-size: 75%;
