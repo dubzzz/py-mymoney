@@ -85,7 +85,7 @@ function reactOnExpenseChange() {
 	var expense = $(this).parent().parent();
 	// expense is the last expense of the table is not equivalent to
 	// data-expense-identifier == LAST_EXPENSE_ID as the expense could have been deleted..
-	if (expense[0] == ADD_EXPENSES_TABLE.children().last()[0] && isFilledExpense(expense)) {
+	if (expense[0] == ADD_EXPENSES_TABLE.find(".nonsorted-table-body .row").last()[0] && isFilledExpense(expense)) {
 		appendExpense();
 	}
 }
@@ -171,93 +171,94 @@ function appendExpense() {
 	// Append an empty expense in the form
 	
 	LAST_EXPENSE_ID++;
-	var expense = $("<tr/>");
-	expense.addClass('expense-edit');
-	expense.attr("data-expense-identifier", LAST_EXPENSE_ID);
+	var $expense = $("<div/>");
+	$expense.addClass('row');
+	$expense.addClass('expense-edit');
+	$expense.attr("data-expense-identifier", LAST_EXPENSE_ID);
 	
-	var date_td = $("<td/>");
-	var date_input_desc = $("<span/>");
-	date_input_desc.addClass("glyphicon glyphicon-calendar");
-	var date_input = $("<input/>");
-	date_input.addClass("date-input");
-	date_input.attr("required", "");
-	date_input.attr("type", "date");
-	if (date_input[0].type == "text") //date type not supported (HTML5)
+	var $date_cell = $("<div/>");
+	var $date_input = $("<input/>");
+	$date_input.addClass("date-input");
+	$date_input.attr("required", "");
+	$date_input.attr("type", "date");
+	if ($date_input[0].type == "text") //date type not supported (HTML5)
 	{
-		date_input.attr("placeholder", "dd/mm/yyyy");
-		date_input.datepicker({dateFormat: "dd/mm/yy"});
+		$date_input.attr("placeholder", "dd/mm/yyyy");
+		$date_input.datepicker({dateFormat: "dd/mm/yy"});
 	}
-	date_input.change(reactOnExpenseChange);
-	date_input.keyup(reactOnExpenseChange);
-	date_td.append(date_input_desc);
-	date_td.append(date_input);
-	expense.append(date_td);
+	$date_input.change(reactOnExpenseChange);
+	$date_input.keyup(reactOnExpenseChange);
+	$date_cell.append($date_input);
+	$expense.append($date_cell);
 
-	var title_td = $("<td/>");
-	var title_input = $("<input/>");
-	title_input.addClass("title-input");
-	title_input.attr("required", "");
-	title_input.attr("size", "50");
-	title_input.attr("type", "text");
-	title_input.attr("placeholder", "Short description of the expense");
-	title_input.keyup(reactOnExpenseChange);
-	var autocomp_title = new AutocompleteItem(title_input, AUTOCOMPLETE_TITLES);
+	var $title_cell = $("<div/>");
+	var $title_input = $("<input/>");
+	$title_input.addClass("title-input");
+	$title_input.attr("required", "");
+	$title_input.attr("type", "text");
+	$title_input.attr("placeholder", "Short description of the expense");
+	$title_input.keyup(reactOnExpenseChange);
+	var autocomp_title = new AutocompleteItem($title_input, AUTOCOMPLETE_TITLES);
 	autocomp_title.setAutomaticallyEraseValue(false);
 	autocomp_title.setOnSelectCallback(reactOnSelectTitle);
-	title_td.append(title_input);
-	expense.append(title_td);
+	$title_cell.append($title_input);
+	$expense.append($title_cell);
 	
-	var price_td = $("<td/>");
-	var price_input = $("<input/>");
-	price_input.addClass("price-input");
-	price_input.attr("required", "");
-	price_input.attr("size", "10");
-	price_input.attr("type", "text");
-	price_input.attr("pattern", "[-+]?(\\d{1,3}([\\s,]\\d{3})*|\\d+)(\\.\\d{0,2})?"); // 1000.00, 1 000.00, 1000 are valids
-	price_input.attr("placeholder", "0.00");
-	price_input.focus(reactOnPriceFocus);
-	price_input.focusout(reactOnPriceFocusOut);
-	price_input.keyup(reactOnExpenseChange);
-	price_td.append(price_input);
-	expense.append(price_td);
+	var $price_cell = $("<div/>");
+	var $price_input = $("<input/>");
+	$price_input.addClass("price-input");
+	$price_input.attr("required", "");
+	$price_input.attr("type", "text");
+	$price_input.attr("pattern", "[-+]?(\\d{1,3}([\\s,]\\d{3})*|\\d+)(\\.\\d{0,2})?"); // 1000.00, 1 000.00, 1000 are valids
+	$price_input.attr("placeholder", "0.00");
+	$price_input.focus(reactOnPriceFocus);
+	$price_input.focusout(reactOnPriceFocusOut);
+	$price_input.keyup(reactOnExpenseChange);
+	$price_cell.append($price_input);
+	$expense.append($price_cell);
 
-	var categories_td = $("<td/>");
-	categories_td.addClass("categories-data");
-	var categories_input = $("<input/>");
-	categories_input.addClass("categories-input");
-	categories_input.attr("type", "text");
-	categories_input.attr("placeholder", "Classify expense");
+	var $categories_cell = $("<div/>");
+	$categories_cell.addClass("categories-data");
+	var $categories_input = $("<input/>");
+	$categories_input.addClass("categories-input");
+	$categories_input.attr("type", "text");
+	$categories_input.attr("placeholder", "Classify expense");
 	var autocomp_categories = XML_TREES_ELTS;
-	var autocomp = new AutocompleteItem(categories_input, autocomp_categories);
+	var autocomp = new AutocompleteItem($categories_input, autocomp_categories);
 	autocomp.setOnFilterChoicesCallback(reactOnFilterCategories);
 	autocomp.setOnSelectCallback(reactOnSelectCategory);
 	if (autocomp_categories.length == 0) {
 		unitializedCategories.push(autocomp);
 	}
-	categories_td.append(categories_input);
-	expense.append(categories_td);
+	$categories_cell.append($categories_input);
+	$expense.append($categories_cell);
 
-	var actions_td = $("<td/>");
-	var delete_img = $("<span/>");
-	delete_img.addClass("glyphicon glyphicon-trash");
-	delete_img.attr("style", "cursor:pointer;");
-	delete_img.attr("title", "Delete this expense");
-	delete_img.click(function() {
+	var $actions_cell = $("<div/>");
+	var $delete_img = $("<span/>");
+	$delete_img.addClass("glyphicon glyphicon-trash");
+	$delete_img.attr("style", "cursor:pointer;");
+	$delete_img.attr("title", "Delete this expense");
+	$delete_img.click(function() {
 		$(this).parent().parent().remove();
-		if (ADD_EXPENSES_TABLE.children().length == 0) {
+		if (ADD_EXPENSES_TABLE.find(".nonsorted-table-body .row").length == 0) {
 			appendExpense();
 		}
 	});
-	actions_td.append(delete_img);
-	var send_img = $("<span/>");
-	send_img.addClass("glyphicon glyphicon-ok");
-	send_img.attr("style", "cursor:pointer;");
-	send_img.attr("title", "Save this expense");
-	send_img.click(ajaxSaveNewExpense);
-	actions_td.append(send_img);
-	expense.append(actions_td);
+	$actions_cell.append($delete_img);
+	var $send_img = $("<span/>");
+	$send_img.addClass("glyphicon glyphicon-ok");
+	$send_img.attr("style", "cursor:pointer;");
+	$send_img.attr("title", "Save this expense");
+	$send_img.click(ajaxSaveNewExpense);
+	$actions_cell.append($send_img);
+	$expense.append($actions_cell);
+	
+	var $cols = ADD_EXPENSES_TABLE.find(".nonsorted-table-header > .row:first-child > div");
+	for (var i = 0 ; i != $cols.length ; i++) {
+		$($expense.children()[i]).addClass($($cols[i]).attr("class"));
+	}
 
-	ADD_EXPENSES_TABLE.append(expense);
+	ADD_EXPENSES_TABLE.find(".nonsorted-table-body").append($expense);
 }
 
 function getTreeNodePath(node) {
@@ -296,8 +297,8 @@ function initAddExpensesTable(addExpenseUrl, xmlTreeUrl, autocomplete_for_title)
 	// Initialize expenses table
 	
 	XML_EXPENSE_ADD_URL = addExpenseUrl;	
-	ADD_EXPENSES_TABLE = $('table#add_expenses_table tbody');
-	ADD_EXPENSES_TABLE.html("");
+	ADD_EXPENSES_TABLE = $('#add-expenses-table');
+	ADD_EXPENSES_TABLE.find(".nonsorted-table-body").html("");
 	AUTOCOMPLETE_TITLES = autocomplete_for_title;
 	appendExpense();
 	$("button#submit-expenses").click(ajaxSaveAllExpenses);
@@ -330,7 +331,7 @@ function ajaxSaveAllExpenses()
 		return;
 	}
 	
-	var expenses = ADD_EXPENSES_TABLE.find("tr");
+	var expenses = ADD_EXPENSES_TABLE.find(".nonsorted-table-body .row");
 	for (var i = 0 ; i != expenses.length ; i++) {
 		var expense = $(expenses[i]);
 		var expense_details = isFilledExpense(expense);
