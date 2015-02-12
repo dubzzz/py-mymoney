@@ -125,6 +125,22 @@ function reactOnPriceFocus() {
 	}
 }
 
+function reactOnFilterCategories($input, choice) {
+	// Do not accept elements that have the same parent id as one of
+	// the already selected choices
+	
+	var $selection = $input.parent().find("ul.autocomplete-selection");
+	if ($selection) {
+		for (var i = 0 ; i != $selection.children().length ; i++) {
+			if (choice["parent_id"] == $($selection.children()[i]).attr("data-parent-id")) {
+				return true;
+			}
+		}
+	} //else nothing has been selected so far for this input
+
+	return false; //the choice can be displayed in the list
+}
+
 function reactOnSelectCategory($input, choice) {
 	var $selection = $input.parent().find("ul.autocomplete-selection");
 	if ($selection.length == 0) {
@@ -134,6 +150,7 @@ function reactOnSelectCategory($input, choice) {
 	}
 	var $elt_dom = $("<li/>");
 	$elt_dom.attr("data-id", choice['autocomplete_id']);
+	$elt_dom.attr("data-parent-id", choice['parent_id']);
 	$elt_dom.attr("title", choice['autocomplete_rawdata_on']);
 	$elt_dom.html(toSafeHtml(choice['autocomplete_rawdata_after']) + " &times;");
 	$elt_dom.click(function() {
@@ -212,6 +229,7 @@ function appendExpense() {
 	categories_input.attr("placeholder", "Classify expense");
 	var autocomp_categories = XML_TREES_ELTS;
 	var autocomp = new AutocompleteItem(categories_input, autocomp_categories);
+	autocomp.setOnFilterChoicesCallback(reactOnFilterCategories);
 	autocomp.setOnSelectCallback(reactOnSelectCategory);
 	if (autocomp_categories.length == 0) {
 		unitializedCategories.push(autocomp);
@@ -254,17 +272,20 @@ function getTreeNodePath(node) {
 	return "";
 }
 
-function loadTrees(nodes) {
+function loadTrees(nodes, parent_id) {
 	for (var i = 0 ; i != nodes.length ; i++) {
 		var node = $(nodes[i]);
 		var children = node.children();
 		if (children.length > 0) {
-			loadTrees(children);
+			loadTrees(
+					children,
+					parent_id == undefined ? node.attr("id") : parent_id);
 		} else {
 			var elt = {
 					autocomplete_rawdata_on: getTreeNodePath(node),
 					autocomplete_rawdata_after: node.attr("title"),
-					autocomplete_id: node.attr("id")
+					autocomplete_id: node.attr("id"),
+					parent_id: parent_id == undefined ? node.attr("id") : parent_id,
 			};
 			XML_TREES_ELTS.push(elt);
 		}
@@ -289,7 +310,7 @@ function initAddExpensesTable(addExpenseUrl, xmlTreeUrl, autocomplete_for_title)
 		{
 			XML_TREES_ELTS = new Array();
 			var root_nodes = $(xml).find("trees").first().find("> node");
-			loadTrees(root_nodes);
+			loadTrees(root_nodes, undefined);
 			for (var i = 0 ; i != unitializedCategories.length ; i++) {
 				unitializedCategories[i].updateList(XML_TREES_ELTS);
 			}
