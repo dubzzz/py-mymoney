@@ -16,6 +16,17 @@ function getDirectContributors($node) {
 	return contributors;
 }
 
+function getContributors($node) {
+	var contributors = getDirectContributors($node);
+	for (var i = 0 ; i != $node.children().length ; i++) {
+		var subcontributors = getDirectContributors($($node.children()[i]));
+		for (var j = 0 ; j != subcontributors.length ; j++) {
+			contributors.push(subcontributors);
+		}
+	}
+	return contributors;
+}
+
 function computeTotal($node) {
 	var total = 0;
 	for (var i = 0 ; i != EXPENSES.length ; i++) {
@@ -48,6 +59,9 @@ function loadTrees(nodes, parent_id, depth) {
 		$td_total.text(total.toLocaleString(language, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €");
 		$tr.append($td_category);
 		$tr.append($td_total);
+		if (total == 0 && getContributors($node).length == 0) {
+			continue;
+		}
 		$TABLE.find("tbody").append($tr);
 		
 		$children = $node.children();
