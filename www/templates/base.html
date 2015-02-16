@@ -46,6 +46,9 @@
             <li {% if page == "display_expenses" %}class="active"{% end %}>
               <a href="{{ reverse_url('display_expenses') }}">My expenses <span class="glyphicon glyphicon-th-list"></span></a>
             </li>
+            <li {% if page == "display_tree_expenses" %}class="active"{% end %}>
+              <a href="{{ reverse_url('display_tree_expenses') }}">My expenses tree) <span class="glyphicon glyphicon-sort-by-attributes"></span></a>
+            </li>
             <li {% if page == "add_expenses" %}class="active"{% end %}>
               <a href="{{ reverse_url('add_expenses') }}">Add expenses <span class="glyphicon glyphicon-plus"></span></a>
             </li>

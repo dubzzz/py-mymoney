@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}My expenses{% end %}
+{% block title_h1 %}My expenses{% end %}
+
+{% block additional_css_js %}
+
+<script src="/static/js/display_tree_expenses_table.js"></script>
+
+{% end %}
+
+{% block content %}
+
+<div id="display-tree-expenses">
+ <table id="display-tree-expenses-table">
+    <thead>
+      <tr>
+        <th>Categories</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="2"><span class="glyphicon glyphicon-info-sign"></span> Please enable JavaScript to be able to see expenses</td></tr>
+    </tbody>
+  </table>
+  <script type="text/javascript">
+    var expenses = [
+      {% for expense_id, expense in expenses.items() %}
+      {
+        date: {{ expense['date'] }},
+        title: "{{ expense['title'] }}",
+        price: {{ expense['price'] }},
+        categories: [
+          {% for category_id, category_name in expense['categories'].items() %}
+            {% if category_id %}{{ category_id }},{% end %}
+          {% end %}
+        ],
+      },
+      {% end %}
+    ];
+    initAddExpensesTable("{{ reverse_url('xml_trees') }}", expenses, $('table'));
+  </script>
+</div>
+
+{% end %}

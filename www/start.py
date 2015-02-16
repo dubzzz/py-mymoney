@@ -19,7 +19,7 @@ sys.path.append(path.join(__CURRENT_PATH, "views", "utilities"))
 import uimodules
 
 sys.path.append(path.join(__CURRENT_PATH, "views"))
-from expenses import AddExpensesHandler, XmlAddExpenseHandler, XmlDeleteExpenseHandler, DisplayExpensesHandler
+from expenses import AddExpensesHandler, XmlAddExpenseHandler, XmlDeleteExpenseHandler, DisplayExpensesHandler, DisplayTreeExpensesHandler
 from nodes import ConfigureNodesHandler, XmlTreesHandler, XmlAddNodeHandler, XmlUpdateNodeHandler, XmlMoveNodeHandler
 
 # Define tornado application
@@ -32,6 +32,7 @@ application = Application([
     url(r"/configure/nodes", ConfigureNodesHandler, name="configure_nodes"),
     url(r"/add/expenses", AddExpensesHandler, name="add_expenses"),
     url(r"/display/expenses", DisplayExpensesHandler, name="display_expenses"),
+    url(r"/display/tree/expenses", DisplayTreeExpensesHandler, name="display_tree_expenses"),
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
     url(r"/xml/add/expense\.xml", XmlAddExpenseHandler, name="xml_add_expense"),
     url(r"/xml/add/node\.xml", XmlAddNodeHandler, name="xml_add_node"),
