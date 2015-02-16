@@ -1,6 +1,21 @@
 var EXPENSES = new Array();
 var $TABLE = null;
 
+function getDirectContributors($node) {
+	var contributors = new Array();
+	for (var i = 0 ; i != EXPENSES.length ; i++) {
+		var expense = EXPENSES[i];
+		var expense_from_node = false;
+		for (var j = 0 ; j != expense["categories"].length ; j++) {
+			expense_from_node |= expense["categories"][j] == $node.attr("id");
+		}
+		if (expense_from_node) {
+			contributors.push(expense);
+		}
+	}
+	return contributors;
+}
+
 function computeTotal($node) {
 	var total = 0;
 	for (var i = 0 ; i != EXPENSES.length ; i++) {
@@ -34,8 +49,26 @@ function loadTrees(nodes, parent_id, depth) {
 		$tr.append($td_category);
 		$tr.append($td_total);
 		$TABLE.find("tbody").append($tr);
-
-		loadTrees($node.children(), $node, depth +1);
+		
+		$children = $node.children();
+		if ($children.length > 0) {
+			loadTrees($children, $node, depth +1);
+		} else {
+			var contributors = getDirectContributors($node);
+			for (var j = 0 ; j != contributors.length ; j++) {
+				var $tr = $("<tr/>");
+				var $td_category = $("<td/>");
+				$td_category.text(contributors[j]["title"]);
+				$td_category.css("padding-left", (depth*20+20) + "px");
+				var $td_total = $("<td/>");
+				$td_total.css("text-align", "right");
+				var language = window.navigator.userLanguage || window.navigator.language;
+				$td_total.text(contributors[j]["price"].toLocaleString(language, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €");
+				$tr.append($td_category);
+				$tr.append($td_total);
+				$TABLE.find("tbody").append($tr);
+			}
+		}
 	}
 }
 
