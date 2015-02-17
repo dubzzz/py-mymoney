@@ -23,14 +23,17 @@
     text-align: right;
 }
 
+#add-expenses-table .row.expense-wait,
 #add-expenses-table .row.expense-wait > div {
     background-color: #a3c5e1;
 }
 
+#add-expenses-table .row.expense-success,
 #add-expenses-table .row.expense-success > div {
     background-color: #b3ffb3;
 }
 
+#add-expenses-table .row.expense-fail,
 #add-expenses-table .row.expense-fail > div {
     background-color: #ffb3b3;
 }
