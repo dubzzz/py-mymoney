@@ -7,6 +7,7 @@
 
 <link rel="stylesheet" href="/static/js-tools/css/hierarchy-table.css">
 <script src="/static/js-tools/js/hierarchy-table.js"></script>
+<script src="/static/js/display_tree_expenses_table.js"></script>
 
 {% end %}
 
@@ -25,7 +26,6 @@
     </tbody>
   </table>
   <script type="text/javascript">
-    var id2node = {};
     var rawdata = [
       {% for expense_id, expense in expenses.items() %}
         {% for category_id, category_name in expense['categories'].items() %}
@@ -39,60 +39,7 @@
       {% end %}
     ];
     
-    function loadTrees(nodes, _parent) {
-      for (var i = 0 ; i != nodes.length ; i++) {
-        var $node = $(nodes[i]);
-        var node = new HierarchyNode($node.attr("title"), _parent);
-        id2node[$node.attr("id")] = node;
-        $children = $node.children();
-        if ($children.length > 0) {
-          loadTrees($children, node);
-        }
-      }
-    }
-
-    function HierarchyPriceItem(data) {
-      var self = this;
-      self.data = data; //data is a price (double)
-
-      self.display = function() {
-        var language = window.navigator.userLanguage || window.navigator.language;
-        return data.toLocaleString(language, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
-      };
-
-      self.aggregate = function(other) {
-        return new HierarchyPriceItem(self.data + other.data);
-      };
-    }
-    HierarchyPriceItem.prototype = new HierarchyItem;
-    
-    function buildHierarchyTable() {
-      var data = new Array();
-      for (var i = 0 ; i != rawdata.length ; i++) {
-        var d = rawdata[i];
-        data.push([
-            id2node[d["category_id"]],
-            new HierarchyNode(d["title"], undefined),
-            new HierarchyPriceItem(d["price"]),
-        ]);
-      }
-      
-      return new HierarchyTable($("#display-tree-expenses-table"), ["Categories", "Label", "Total"], data);
-    }
-
-    $.ajax({
-      type: "get",
-      url: "{{ reverse_url('xml_trees') }}",
-      dataType: "xml",
-      success: function(xml)
-      {
-        var root_nodes = $(xml).find("trees").first().find("> node");
-        loadTrees(root_nodes, undefined);
-        var table = buildHierarchyTable();
-        table.display();
-      }
-    });
-    
+    initAddExpensesTable("{{ reverse_url('xml_trees') }}", rawdata, $("#display-tree-expenses-table"));
   </script>
 </div>
 

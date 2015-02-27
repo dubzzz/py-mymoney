@@ -1,105 +1,56 @@
-var EXPENSES = new Array();
-var $TABLE = null;
+function HierarchyPriceItem(data) {
+	var self = this;
+	self.data = data; //data is a price (double)
 
-function getDirectContributors($node) {
-	var contributors = new Array();
-	for (var i = 0 ; i != EXPENSES.length ; i++) {
-		var expense = EXPENSES[i];
-		var expense_from_node = false;
-		for (var j = 0 ; j != expense["categories"].length ; j++) {
-			expense_from_node |= expense["categories"][j] == $node.attr("id");
-		}
-		if (expense_from_node) {
-			contributors.push(expense);
-		}
+	self.display = function() {
+		var language = window.navigator.userLanguage || window.navigator.language;
+		return data.toLocaleString(language, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+	};
+
+	self.aggregate = function(other) {
+		return new HierarchyPriceItem(self.data + other.data);
+	};
+}
+HierarchyPriceItem.prototype = new HierarchyItem;
+
+function buildHierarchyTable(rawdata, id2node, $table) {
+	var data = new Array();
+	for (var i = 0 ; i != rawdata.length ; i++) {
+		var d = rawdata[i];
+		data.push([
+				id2node[d["category_id"]],
+				new HierarchyNode(d["title"], undefined),
+				new HierarchyPriceItem(d["price"]),
+		]);
 	}
-	return contributors;
+
+	return new HierarchyTable($table, ["Categories", "Label", "Total"], data);
 }
 
-function getContributors($node) {
-	var contributors = getDirectContributors($node);
-	for (var i = 0 ; i != $node.children().length ; i++) {
-		var subcontributors = getDirectContributors($($node.children()[i]));
-		for (var j = 0 ; j != subcontributors.length ; j++) {
-			contributors.push(subcontributors);
-		}
-	}
-	return contributors;
-}
-
-function computeTotal($node) {
-	var total = 0;
-	for (var i = 0 ; i != EXPENSES.length ; i++) {
-		var expense = EXPENSES[i];
-		var expense_from_node = false;
-		for (var j = 0 ; j != expense["categories"].length ; j++) {
-			expense_from_node |= expense["categories"][j] == $node.attr("id");
-		}
-		if (expense_from_node) {
-			total += expense["price"];
-		}
-	}
-	for (var i = 0 ; i != $node.children().length ; i++) {
-		total += computeTotal($($node.children()[i]));
-	}
-	return total;
-}
-
-function loadTrees(nodes, parent_id, depth) {
+function loadTrees(nodes, _parent, id2node) {
 	for (var i = 0 ; i != nodes.length ; i++) {
 		var $node = $(nodes[i]);
-		var $tr = $("<tr/>");
-		var $td_category = $("<td/>");
-		$td_category.text($node.attr("title"));
-		$td_category.css("padding-left", (depth*20) + "px");
-		var $td_total = $("<td/>");
-		$td_total.css("text-align", "right");
-		var total = computeTotal($node);
-		var language = window.navigator.userLanguage || window.navigator.language;
-		$td_total.text(total.toLocaleString(language, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €");
-		$tr.append($td_category);
-		$tr.append($td_total);
-		if (total == 0 && getContributors($node).length == 0) {
-			continue;
-		}
-		$TABLE.find("tbody").append($tr);
-		
+		var node = new HierarchyNode($node.attr("title"), _parent);
+		id2node[$node.attr("id")] = node;
 		$children = $node.children();
 		if ($children.length > 0) {
-			loadTrees($children, $node, depth +1);
-		} else {
-			var contributors = getDirectContributors($node);
-			for (var j = 0 ; j != contributors.length ; j++) {
-				var $tr = $("<tr/>");
-				var $td_category = $("<td/>");
-				$td_category.text(contributors[j]["title"]);
-				$td_category.css("padding-left", (depth*20+20) + "px");
-				var $td_total = $("<td/>");
-				$td_total.css("text-align", "right");
-				var language = window.navigator.userLanguage || window.navigator.language;
-				$td_total.text(contributors[j]["price"].toLocaleString(language, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €");
-				$tr.append($td_category);
-				$tr.append($td_total);
-				$TABLE.find("tbody").append($tr);
-			}
+			loadTrees($children, node, id2node);
 		}
 	}
 }
 
-function initAddExpensesTable(xmlTreeUrl, expenses, $table) {
-	EXPENSES = expenses;
-	$TABLE = $table;
-	
+function initAddExpensesTable(xmlTreeUrl, rawdata, $table) {
 	$.ajax({
 		type: "get",
 		url: xmlTreeUrl,
 		dataType: "xml",
 		success: function(xml)
 		{
-			$TABLE.find("tbody").children().remove();
-			XML_TREES_ELTS = new Array();
+			var id2node = {};
 			var root_nodes = $(xml).find("trees").first().find("> node");
-			loadTrees(root_nodes, undefined, 0);
+			loadTrees(root_nodes, undefined, id2node);
+			var table = buildHierarchyTable(rawdata, id2node, $table);
+			table.display();
 		}
 	});
 }
