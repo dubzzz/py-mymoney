@@ -17,8 +17,12 @@ function buildHierarchyTable(rawdata, id2node, $table) {
 	var data = new Array();
 	for (var i = 0 ; i != rawdata.length ; i++) {
 		var d = rawdata[i];
+		var categories = new Array();
+		for (var j = 0 ; j != d["category_ids"].length ; j++) {
+			categories.push(id2node[d["category_ids"][j]]);
+		}
 		data.push([
-				id2node[d["category_id"]],
+				new HierarchyList(categories),
 				new HierarchyItem(d["title"]),
 				new HierarchyPriceItem(d["price"]),
 		]);

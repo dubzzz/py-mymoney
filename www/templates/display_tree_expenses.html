@@ -28,14 +28,16 @@
   <script type="text/javascript">
     var rawdata = [
       {% for expense_id, expense in expenses.items() %}
-        {% for category_id, category_name in expense['categories'].items() %}
-        {
-          title: "{{ expense['title'] }}",
-          category_id: {{ category_id }},
-          date: {{ expense['date'] }},
-          price: {{ expense['price'] }},
-        },
-        {% end %}
+      {
+        title: "{{ expense['title'] }}",
+        category_ids: [
+          {% for category_id, category_name in expense['categories'].items() %}
+               {{ category_id }},     
+          {% end %}
+        ],
+        date: {{ expense['date'] }},
+        price: {{ expense['price'] }},
+      },
       {% end %}
     ];
     
