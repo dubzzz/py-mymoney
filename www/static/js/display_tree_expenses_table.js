@@ -19,12 +19,12 @@ function buildHierarchyTable(rawdata, id2node, $table) {
 		var d = rawdata[i];
 		data.push([
 				id2node[d["category_id"]],
-				new HierarchyNode(d["title"], undefined),
+				new HierarchyItem(d["title"]),
 				new HierarchyPriceItem(d["price"]),
 		]);
 	}
 
-	return new HierarchyTable($table, ["Categories", "Label", "Total"], data);
+	return new HierarchyTable($table, ["Categories", "Label", "Total"], data, 2);
 }
 
 function loadTrees(nodes, _parent, id2node) {
