@@ -77,32 +77,6 @@
     var $table = $("#display-tree-expenses-table");
     initAddExpensesTable("{{ reverse_url('xml_trees') }}", rawdata, $table, id2node);
     
-    function dropItem(event, ui) {
-      var offsetLeft = $(ui.draggable[0]).offset().left;
-      var offsetRight = offsetLeft + $(ui.draggable[0]).width();
-      $(ui.draggable[0]).remove();
-
-      var found = false;
-      var nodes_to_move = new Array();
-      var length = $(this).children().length;
-      for (var i = 0 ; i != length ; i++) {
-        var childOffsetLeft = $($(this).children()[i]).offset().left;
-        var childOffsetRight = childOffsetLeft + $($(this).children()[i]).width();
-        if (found || (offsetLeft + offsetRight)/2 <= (childOffsetLeft + childOffsetRight)/2) {
-          found = true;
-          $(this).append($(ui.draggable[0]));
-          nodes_to_move.push($(this).children()[i]);
-        }
-      }
-      if (! found) {
-        $(this).append($(ui.draggable[0]));
-      }
-      for (var i = 0 ; i != nodes_to_move.length ; i++) {
-        $(this).append($(nodes_to_move[i]));
-      }
-      buildHierarchyTable(rawdata, id2node, $table);
-    }
-
     $("li.hcolumn").draggable({revert: true,});
     $("ul.hcolumns").droppable({
         accept: "li.hcolumn",
@@ -133,7 +107,7 @@
             $(this).append($(nodes_to_move[i]));
           }
           //$(ui.draggable[0]).draggable({revert: true,}); //due to remove
-          buildHierarchyTable(rawdata, id2node, $table);
+          editHierarchyTable(rawdata, id2node, $table, $(ui.draggable[0]).attr("data-label"));
         },
     });
   </script>

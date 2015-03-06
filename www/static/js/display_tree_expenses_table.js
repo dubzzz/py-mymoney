@@ -1,3 +1,8 @@
+var hierarchyLabels = undefined;
+var hierarchyNumHierarchyColumns = 0;
+var hierarchyTable = undefined;
+var hierarchyData = undefined;
+
 function HierarchyPriceItem(data) {
 	var self = this;
 	self.data = data; //data is a price (double)
@@ -60,6 +65,24 @@ function HierarchyDateItem(data, label) {
 }
 HierarchyDateItem.prototype = new HierarchyItem;
 
+function buildHierarchyItem(label, d) {
+	if (label == "category") {
+		var categories = new Array();
+		for (var k = 0 ; k != d["category_ids"].length ; k++) {
+			categories.push(id2node[d["category_ids"][k]]);
+		}
+		return new HierarchyList(categories);
+	} else if (label == "title") {
+		return new HierarchyItem(d["title"]);
+	} else if (label == "price") {
+		return new HierarchyPriceItem(d["price"]);
+	} else if (label.startsWith("date")) {
+		return new HierarchyDateItem(d["date"], label);
+	}
+	console.warn("Unexpected label");
+	return undefined;
+}
+
 function buildHierarchyTable(rawdata, id2node, $table) {
 	var datalisttitles = new Array();
 	var datalistlabels = new Array();
@@ -77,29 +100,62 @@ function buildHierarchyTable(rawdata, id2node, $table) {
 	var data = new Array();
 	for (var i = 0 ; i != rawdata.length ; i++) {
 		var d = rawdata[i];
-		
 		var datalist = new Array();
-
 		for (var j = 0 ; j != datalistlabels.length ; j++) {
-			var label = datalistlabels[j];
-			if (label == "category") {
-				var categories = new Array();
-				for (var k = 0 ; k != d["category_ids"].length ; k++) {
-					categories.push(id2node[d["category_ids"][k]]);
-				}
-				datalist.push(new HierarchyList(categories));
-			} else if (label == "title") {
-				datalist.push(new HierarchyItem(d["title"]));
-			} else if (label == "price") {
-				datalist.push(new HierarchyPriceItem(d["price"]));
-			} else if (label.startsWith("date")) {
-				datalist.push(new HierarchyDateItem(d["date"], label));
-			}
+			datalist.push(buildHierarchyItem(datalistlabels[j], d));
 		}
 		data.push(datalist);
 	}
+	
+	hierarchyLabels = datalistlabels;
+	hierarchyNumHierarchyColumns = $columns_hierarchy.length;
+	hierarchyData = data;
+	hierarchyTable = new HierarchyTable($table, datalisttitles, data, $columns_hierarchy.length);
+	return hierarchyTable;
+}
 
-	return new HierarchyTable($table, datalisttitles, data, $columns_hierarchy.length);
+function editHierarchyTable(rawdata, id2node, $table, label) {
+	var previous_location = $.inArray(label, hierarchyLabels);
+	var datalisttitles = new Array();
+	var datalistlabels = new Array();
+	var $columns_hierarchy = $("#columns_hierarchy li");
+	var $columns_usual = $("#columns_usual li");
+	for (var j = 0 ; j != $columns_hierarchy.length ; j++) {
+		datalisttitles.push($($columns_hierarchy[j]).text());
+		datalistlabels.push($($columns_hierarchy[j]).attr("data-label"));
+	}
+	for (var j = 0 ; j != $columns_usual.length ; j++) {
+		datalisttitles.push($($columns_usual[j]).text());
+		datalistlabels.push($($columns_usual[j]).attr("data-label"));
+	}
+	var current_location = $.inArray(label, datalistlabels);
+	
+	if (previous_location == current_location && hierarchyNumHierarchyColumns == $columns_hierarchy.length) {
+		return;
+	}
+
+	if (previous_location != -1) {
+		for (var i = 0 ; i != rawdata.length ; i++) {
+			hierarchyData[i].splice(previous_location, 1);
+		}
+		hierarchyTable.removeColumn(previous_location);
+	}
+	hierarchyTable.display();
+
+	if (current_location != -1) {
+		for (var i = 0 ; i != rawdata.length ; i++) {
+			var d = rawdata[i]
+			hierarchyData[i].splice(current_location, 0, buildHierarchyItem(label, d));
+		}
+		if (current_location < $columns_hierarchy.length) {
+			hierarchyTable.addHierarchyColumn(current_location, hierarchyData, datalisttitles);
+		} else {
+			hierarchyTable.addColumn(current_location, hierarchyData, datalisttitles);
+		}
+	}
+	hierarchyTable.display();
+	hierarchyLabels = datalistlabels;
+	hierarchyNumHierarchyColumns = $columns_hierarchy.length
 }
 
 function loadTrees(nodes, _parent, id2node) {
