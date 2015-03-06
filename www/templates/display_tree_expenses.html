@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}My expenses{% end %}
-{% block title_h1 %}My expenses{% end %}
+{% block title %}Expenses{% end %}
 
 {% block additional_css_js %}
 
@@ -15,6 +14,21 @@
 {% block content %}
 
 <div id="display-tree-expenses">
+  <script type="text/javascript">
+    function hideOrShow(c) {
+      var $elt = $('.hcolumns-choices');
+      if ($elt.is(":visible")) {
+        $elt.hide(500);
+        $(c).html('<span class="glyphicon glyphicon-pencil"></span> Edit');
+      } else {
+        $elt.show(500);
+        $(c).html('<span class="glyphicon glyphicon-minus"></span> Hide');
+      }
+    }
+  </script>
+  <div style="text-align:right;">
+    <a href="#" onclick="javascript:hideOrShow(this);"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+  </div>
   <div class="hcolumns-choices container-fluid">
     <ul class="hcolumns col-md-4" id="columns_hierarchy">
       <li class="hcolumn" data-label="category">Category</li>
@@ -43,6 +57,7 @@
     </tbody>
   </table>
   <script type="text/javascript">
+    $('.hcolumns-choices').hide();
     var rawdata = [
       {% for expense_id, expense in expenses.items() %}
       {

@@ -1,3 +1,146 @@
+body
+{
+    font-family: Georgia, "Times New Roman", Times, serif;
+    color: #555;
+}
+
+h1, .h1,
+h2, .h2,
+h3, .h3,
+h4, .h4,
+h5, .h5,
+h6, .h6
+{
+    margin-top: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    color: #333;
+}
+
+#webpage-content
+{
+    margin-top: 80px;
+}
+
+nav.navbar
+{
+    min-height: 30px;
+    background-color: #428bca;
+    -webkit-box-shadow: inset 0 -2px 5px rgba(0,0,0,.1);
+    box-shadow: inset 0 -2px 5px rgba(0,0,0,.1);
+}
+
+nav.navbar .navbar-toggle .icon-bar
+{
+    background-color: #cdddeb;
+}
+
+nav.navbar .navbar-toggle:hover .icon-bar
+{
+    background-color: #fff;
+}
+
+.navbar-toggle
+{
+    background-color: rgba(0, 1, 101, 0.36);
+}
+
+ul.navbar-nav li a,
+ul.navbar-nav li a:link,
+ul.navbar-nav li a:visited,
+ul.navbar-nav li a:hover,
+ul.navbar-nav li a:active
+{ /* prevent default behaviour */
+    text-decoration: none;
+    color: #cdddeb;
+    background-color: #428bca;
+    padding: 5px;
+}
+
+ul.navbar-nav li
+{
+    position: relative;
+    padding: 5px;
+    font-weight: 500;
+    color: #cdddeb;
+}
+
+ul.navbar-nav.navbar-right
+{
+    text-align: right;
+}
+
+ul.navbar-nav.navbar-right li
+{
+    display: inline-block;
+}
+
+ul.navbar-nav li:hover,
+ul.navbar-nav li:focus,
+ul.navbar-nav li:hover a,
+ul.navbar-nav li:focus a
+{
+    color: #fff;
+    text-decoration: none;
+    background-color: #428bca;
+}
+
+ul.navbar-nav li.active,
+ul.navbar-nav li.active a
+{
+    color: #fff;
+}
+
+ul.navbar-nav li.active:after
+{
+    position: absolute;
+    left: 0;
+    bottom: 50%;
+    width: 0;
+    height: 0;
+    margin-bottom: -5px;
+    vertical-align: middle;
+    content: " ";
+    border-top: 5px solid transparent;
+    border-left: 5px solid;
+    border-bottom: 5px solid transparent;
+}
+@media (min-width:768px)
+{
+ul.navbar-nav li.active:after
+{
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    margin-bottom: 0;
+    margin-left: -5px;
+    vertical-align: middle;
+    content: " ";
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid;
+    border-left: 5px solid transparent;
+}
+}
+ul.navbar-nav.navbar-right li.active:after
+{
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    margin-bottom: 0;
+    margin-left: -5px;
+    vertical-align: middle;
+    content: " ";
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid;
+    border-left: 5px solid transparent;
+}
+
+/******/
+
 .slider-without-color .ui-slider-range {
     background: none;
 }
