@@ -76,7 +76,7 @@ function buildHierarchyItem(label, d) {
 		return new HierarchyItem(d["title"]);
 	} else if (label == "price") {
 		return new HierarchyPriceItem(d["price"]);
-	} else if (label.startsWith("date")) {
+	} else if (label.substr(0, 4) == "date") {
 		return new HierarchyDateItem(d["date"], label);
 	}
 	console.warn("Unexpected label");
