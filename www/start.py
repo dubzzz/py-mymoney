@@ -28,14 +28,34 @@ from nodes import ConfigureNodesHandler, XmlTreesHandler, XmlAddNodeHandler, Xml
 # WebsocketHandler definition
 clients = list()
 class MyMoneyWebSocketHandler(WebSocketHandler):
+    def get_current_user(self):
+        return self.get_secure_cookie("username")
+    
+    def remove(self):
+        r""" Remove the user from the list of available users """
+        try:
+            clients.remove(self)
+        except ValueError:
+            pass
+
     def open(self, *args):
+        r""" Open the websocket for allowed users only """
+        if self.current_user is None:
+            self.close()
+            return
         clients.append(self)
-
+    
     def on_message(self, message):
+        r""" Receive messages from allowed users only, remove the others """
+        if self.current_user is None:
+            self.remove()
+            self.close()
+            return
         pass
-
+    
     def on_close(self):
-        clients.remove(self)
+        r""" Close websocket and remove from list of available users """
+        self.remove()
 
 # Define tornado application
 settings = {
