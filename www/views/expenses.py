@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from tornado.web import RequestHandler, authenticated
+from tornado.web import RequestHandler, authenticated, asynchronous
 from auth import BaseHandler
 import sqlite3
 
@@ -22,6 +22,7 @@ from trees import getRootId, getPathToNodeFromTrees, retrieveTrees
 
 class AddExpensesHandler(BaseHandler):
     @authenticated
+    @asynchronous
     def get(self):
         r"""
         Form to give the ability to add several expenses
@@ -41,6 +42,7 @@ class AddExpensesHandler(BaseHandler):
 
 class DisplayExpensesHandler(BaseHandler):
     @authenticated
+    @asynchronous
     def get(self):
         r"""
         Table containing all the expenses already saved
@@ -74,6 +76,7 @@ class DisplayExpensesHandler(BaseHandler):
 
 class DisplayTreeExpensesHandler(BaseHandler):
     @authenticated
+    @asynchronous
     def get(self):
         r"""
         Table containing all the expenses already saved
@@ -110,6 +113,7 @@ class DisplayTreeExpensesHandler(BaseHandler):
 class XmlAddExpenseHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
+    @asynchronous
     def post(self):
         r"""
         Add an expense to the database
@@ -202,6 +206,7 @@ class XmlAddExpenseHandler(BaseHandler):
 class XmlDeleteExpenseHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
+    @asynchronous
     def post(self):
         r"""
         Delete an expense from the database

@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from tornado.web import RequestHandler, authenticated
+from tornado.web import RequestHandler, authenticated, asynchronous
 from auth import BaseHandler
 import sqlite3
 
@@ -20,6 +20,7 @@ from trees import Node, isInTree, getRootId, retrieveTrees
 
 class ConfigureNodesHandler(BaseHandler):
     @authenticated
+    @asynchronous
     def get(self):
         r"""
         Render the trees currently saved into the database,
@@ -34,6 +35,7 @@ class ConfigureNodesHandler(BaseHandler):
 class XmlAddNodeHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
+    @asynchronous
     def post(self):
         r"""
         Creation of a new node with appropriate data
@@ -74,6 +76,7 @@ class XmlAddNodeHandler(BaseHandler):
 class XmlUpdateNodeHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
+    @asynchronous
     def post(self):
         r"""
         Update a given node with appropriate data
@@ -111,6 +114,7 @@ class XmlUpdateNodeHandler(BaseHandler):
 class XmlMoveNodeHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
+    @asynchronous
     def post(self):
         r"""
         Move a given node to another parent
@@ -172,6 +176,7 @@ class XmlMoveNodeHandler(BaseHandler):
 
 class XmlTreesHandler(BaseHandler):
     @xmlcontent
+    @asynchronous
     def get(self):
         r"""
         Render trees in an XML file

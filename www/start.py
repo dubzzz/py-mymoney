@@ -5,7 +5,8 @@
 # ./start.py <port=8080>
 
 from tornado.ioloop import IOLoop
-from tornado.web import RequestHandler, StaticFileHandler, Application, url
+from tornado.web import asynchronous, RequestHandler, StaticFileHandler, Application, url
+from tornado.websocket import WebSocketHandler
 
 import sys
 from os import path
@@ -23,6 +24,18 @@ sys.path.append(path.join(__CURRENT_PATH, "views"))
 from auth import LoginHandler, LogoutHandler
 from expenses import AddExpensesHandler, XmlAddExpenseHandler, XmlDeleteExpenseHandler, DisplayExpensesHandler, DisplayTreeExpensesHandler
 from nodes import ConfigureNodesHandler, XmlTreesHandler, XmlAddNodeHandler, XmlUpdateNodeHandler, XmlMoveNodeHandler
+
+# WebsocketHandler definition
+clients = list()
+class MyMoneyWebSocketHandler(WebSocketHandler):
+    def open(self, *args):
+        clients.append(self)
+
+    def on_message(self, message):
+        pass
+
+    def on_close(self):
+        clients.remove(self)
 
 # Define tornado application
 settings = {
@@ -46,7 +59,8 @@ application = Application([
     url(r"/xml/delete/expense\.xml", XmlDeleteExpenseHandler, name="xml_delete_expense"),
     url(r"/xml/update/node\.xml", XmlUpdateNodeHandler, name="xml_update_node"),
     url(r"/xml/move/node\.xml", XmlMoveNodeHandler, name="xml_move_node"),
-    url(r"/static/(.*)", StaticFileHandler, {'path': __STATIC_ABSPATH}),
+    url(r"/ws/", MyMoneyWebSocketHandler, name="websocket"),
+    url(r'/static/(.*)', StaticFileHandler, {'path': __STATIC_ABSPATH}),
 ], **settings)
 
 if __name__ == "__main__":
