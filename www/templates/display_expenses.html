@@ -31,29 +31,27 @@
   </div>
   <script type="text/javascript">
     function deleteExpense(expense_id) {
-      $.ajax({
-        type: "post",
-        url: "{{ reverse_url('xml_delete_expense') }}",
-        data:
-        {
-          _xsrf: getCookie("_xsrf"),
-          expense_id: expense_id,
-        },
-        dataType: "xml",
-        success: function(xml)
-        {
-          var position = $.inArray(expense_id, my_expenses_table_ids);
-          if (position != -1) {
-            my_expenses_table_ids.splice(position, 1);
-            my_expenses_table_data.splice(position, 1);
-            my_expenses_table.update(-1);
-          }
-        },
-        error: function(xhr)
-        {
-          alert($(xhr.responseText).text());
-        }
-      });
+      ws.send(
+            "delete-expense",
+            {
+              expense_id: expense_id,
+            },
+            function (s, msg)
+            {
+              if (s == "success")
+              {
+                var position = $.inArray(expense_id, my_expenses_table_ids);
+                if (position != -1)
+                {
+                  my_expenses_table_ids.splice(position, 1);
+                  my_expenses_table_data.splice(position, 1);
+                  my_expenses_table.refreshData(my_expenses_table_data);
+                  my_expenses_table.update(-1);
+                }
+                return true;
+              }
+              return false;
+            });
     }
 
     var my_expenses_table_type = [

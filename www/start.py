@@ -24,7 +24,7 @@ from request_helper import ForbiddenOperationException
 
 sys.path.append(path.join(__CURRENT_PATH, "views"))
 from auth import LoginHandler, LogoutHandler
-from expenses import AddExpensesHandler, addExpense, XmlDeleteExpenseHandler, DisplayExpensesHandler, DisplayTreeExpensesHandler
+from expenses import AddExpensesHandler, DisplayExpensesHandler, DisplayTreeExpensesHandler, addExpense, deleteExpense
 from nodes import ConfigureNodesHandler, XmlTreesHandler, XmlAddNodeHandler, XmlUpdateNodeHandler, XmlMoveNodeHandler
 
 # WebsocketHandler definition
@@ -84,6 +84,8 @@ class MyMoneyWebSocketHandler(WebSocketHandler):
         try:
             if aim == "add-expense":
                 response = addExpense(content["message"])
+            elif aim == "delete-expense":
+                response = deleteExpense(content["message"])
         except KeyError as e:
             status = "error"
             response = "No data has been transfered"
@@ -121,7 +123,6 @@ application = Application([
     url(r"/display/tree/expenses", DisplayTreeExpensesHandler, name="display_tree_expenses"),
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
     url(r"/xml/add/node\.xml", XmlAddNodeHandler, name="xml_add_node"),
-    url(r"/xml/delete/expense\.xml", XmlDeleteExpenseHandler, name="xml_delete_expense"),
     url(r"/xml/update/node\.xml", XmlUpdateNodeHandler, name="xml_update_node"),
     url(r"/xml/move/node\.xml", XmlMoveNodeHandler, name="xml_move_node"),
     url(r"/ws/", MyMoneyWebSocketHandler, name="websocket"),

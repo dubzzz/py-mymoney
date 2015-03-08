@@ -199,28 +199,27 @@ def addExpense(msg):
 
 # XML answers to AJAX queries
 
-class XmlDeleteExpenseHandler(BaseHandler):
-    @xmlcontent
-    @donotpropagate_forbidden_operation
-    @asynchronous
-    def post(self):
-        r"""
-        Delete an expense from the database
-        
-        Conditions
-        ----------
-        - no specific checks, only existing expenses will be destroyed
-        """
-        
-        try:
-            expense_id = int(self.request.arguments["expense_id"][0])
-        except (KeyError, IndexError, TypeError, ValueError) as e:
-            raise404(self, 'Malformed query: missing expense_id')
+def deleteExpense(msg):
+    r"""
+    Delete an expense from the database
+    
+    Conditions
+    ----------
+    - no specific checks, only existing expenses will be destroyed
+    """
+    
+    try:
+        expense_id = int(msg["expense_id"])
+    except (KeyError, TypeError, ValueError) as e:
+        raise ForbiddenOperationException('Malformed query: missing expense_id')
 
-        # Save the expense into the database
-        conn = sqlite3.connect(DEFAULT_DB)
-        with conn:
-            c = conn.cursor()
-            c.execute('''DELETE FROM expense WHERE id=?''', (expense_id,))
-            c.execute('''DELETE FROM node_expense WHERE expense_id=?''', (expense_id,))
+    # Save the expense into the database
+    conn = sqlite3.connect(DEFAULT_DB)
+    with conn:
+        c = conn.cursor()
+        c.execute('''DELETE FROM expense WHERE id=?''', (expense_id,))
+        c.execute('''DELETE FROM node_expense WHERE expense_id=?''', (expense_id,))
+        return {}
+
+    raise ForbiddenOperationException('Unhandled exception')
 
