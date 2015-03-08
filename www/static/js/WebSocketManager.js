@@ -2,10 +2,13 @@ function WebSocketManager(url)
 {
 	var self = this;
 	
+	self._last_id = 0;
 	self._url = url;
 	self._ws = undefined;
 	self._ping = undefined;
 	self._waiting_list = new Array();
+	self._message_readers = new Array();
+	self._waiting_callbacks = {};
 	
 	/* Internal methods to open and close websockets */
 	
@@ -54,7 +57,7 @@ function WebSocketManager(url)
 		}
 		if (self.isReady())
 		{
-			self.send("ping", undefined);
+			self.send("ping", undefined, undefined);
 		}
 	};
 	
@@ -74,6 +77,35 @@ function WebSocketManager(url)
 	{
 		var data = JSON.parse(event.data);
 		console.log("WebSocketManager:: Received: " + data);
+		
+		if (data["aim"] == "response")
+		{
+			var msg = data["message"];
+			var s = data["status"];
+			var id = parseInt(data["id"]);
+			
+			if (self._waiting_callbacks[id] === undefined)
+			{
+				console.warn("WebSocketManager:: Unknown callback for " + data);
+				return;
+			}
+			
+			var fully_treated = self._waiting_callbacks[id](s, msg);
+			if (s == "error" && !fully_treated)
+			{
+				var $modal = $("#myModal");
+				$modal.find(".modal-title").text("Error");
+				$modal.find(".modal-body").text(msg);
+				var $btn = $modal.find(".btn-primary");
+				$btn.hide();
+				$modal.modal();
+			}
+			return;
+		}
+		for (var i = 0 ; i != self._message_readers.length ; i++)
+		{
+			self._message_readers[i](data);
+		}
 	};
 	
 	self.onerror = function(event)
@@ -148,14 +180,16 @@ function WebSocketManager(url)
 		var $modal = $("#myModal");
 		$modal.find(".modal-title").text("Lost connection");
 		$modal.find(".modal-body").text("You have been disconnected from websockets. Please refresh the webpage or press reconnect if you want to stay connected to automatic updates.");
-		$modal.find(".btn-primary").text("Reconnect");
-		$modal.find(".btn-primary").click(self.open);
+		var $btn = $modal.find(".btn-primary");
+		$btn.text("Reconnect");
+		$btn.click(self.open);
+		$btn.show();
 		$modal.modal();
 	};
 
 	/* External API */
 	
-	self.send = function(aim, message) {
+	self.send = function(aim, message, callback) {
 		var data = {
 				aim: aim,
 				message: message,
@@ -166,8 +200,21 @@ function WebSocketManager(url)
 			return;
 		}
 		
-		console.log("WebSocketManager:: send(" + aim + ")");
+		data["id"] = -1;
+		if (callback)
+		{
+			data["id"] = self._last_id++;
+			self._waiting_callbacks[data["id"]] = callback;
+		}
+		console.log("WebSocketManager:: send(" + aim + ", " + data["id"] + ")");
 		self._ws.send(JSON.stringify(data));
+	};
+
+	self.addReader = function(reader)
+	{
+		// reader will be called fo each message
+		// with data argument (json)
+		self._message_readers.push(reader);
 	};
 
 	{

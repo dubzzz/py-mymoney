@@ -8,6 +8,7 @@ from tornado.ioloop import IOLoop
 from tornado.web import asynchronous, RequestHandler, StaticFileHandler, Application, url
 from tornado.websocket import WebSocketHandler
 
+import json
 import sys
 from os import path
 from config import COOKIE_SECRET
@@ -19,10 +20,11 @@ __TEMPLATES_ABSPATH = path.join(__CURRENT_ABSPATH, "templates")
 
 sys.path.append(path.join(__CURRENT_PATH, "views", "utilities"))
 import uimodules
+from request_helper import ForbiddenOperationException
 
 sys.path.append(path.join(__CURRENT_PATH, "views"))
 from auth import LoginHandler, LogoutHandler
-from expenses import AddExpensesHandler, XmlAddExpenseHandler, XmlDeleteExpenseHandler, DisplayExpensesHandler, DisplayTreeExpensesHandler
+from expenses import AddExpensesHandler, addExpense, XmlDeleteExpenseHandler, DisplayExpensesHandler, DisplayTreeExpensesHandler
 from nodes import ConfigureNodesHandler, XmlTreesHandler, XmlAddNodeHandler, XmlUpdateNodeHandler, XmlMoveNodeHandler
 
 # WebsocketHandler definition
@@ -51,7 +53,51 @@ class MyMoneyWebSocketHandler(WebSocketHandler):
             self.remove()
             self.close()
             return
-        pass
+        
+        try:
+            content = json.loads(message)
+        except:
+            self.write_message(
+                    json.dumps(
+                    {
+                        "aim": "response",
+                        "id": -1,
+                        "status": "error",
+                        "message": "Unable to handle the query [invalid JSON]"}))
+
+        try:
+            aim = content["aim"]
+        except KeyError as e:
+            self.write_message(
+                    json.dumps(
+                    {
+                        "aim": "response",
+                        "id": -1,
+                        "status": "error",
+                        "message": "Unable to handle the query [no aim specified]"}))
+
+        if aim == "ping":
+            return
+
+        status = "success"
+        response = None
+        try:
+            if aim == "add-expense":
+                response = addExpense(content["message"])
+        except KeyError as e:
+            status = "error"
+            response = "No data has been transfered"
+        except ForbiddenOperationException as e:
+            status = "error"
+            response = e.message
+        
+        self.write_message(
+                json.dumps(
+                {
+                    "aim": "response",
+                    "id": content["id"],
+                    "status": status,
+                    "message": response}))
     
     def on_close(self):
         r""" Close websocket and remove from list of available users """
@@ -74,7 +120,6 @@ application = Application([
     url(r"/display/expenses", DisplayExpensesHandler, name="display_expenses"),
     url(r"/display/tree/expenses", DisplayTreeExpensesHandler, name="display_tree_expenses"),
     url(r"/xml/trees\.xml", XmlTreesHandler, name="xml_trees"),
-    url(r"/xml/add/expense\.xml", XmlAddExpenseHandler, name="xml_add_expense"),
     url(r"/xml/add/node\.xml", XmlAddNodeHandler, name="xml_add_node"),
     url(r"/xml/delete/expense\.xml", XmlDeleteExpenseHandler, name="xml_delete_expense"),
     url(r"/xml/update/node\.xml", XmlUpdateNodeHandler, name="xml_update_node"),

@@ -1,4 +1,3 @@
-var XML_EXPENSE_ADD_URL = null;
 var ADD_EXPENSES_TABLE = null;
 var XML_TREES_ELTS = new Array();
 var AUTOCOMPLETE_TITLES = new Array();
@@ -293,10 +292,9 @@ function loadTrees(nodes, parent_id) {
 	}
 }
 
-function initAddExpensesTable(addExpenseUrl, xmlTreeUrl, autocomplete_for_title) {
+function initAddExpensesTable(xmlTreeUrl, autocomplete_for_title) {
 	// Initialize expenses table
 	
-	XML_EXPENSE_ADD_URL = addExpenseUrl;	
 	ADD_EXPENSES_TABLE = $('#add-expenses-table');
 	ADD_EXPENSES_TABLE.find(".nonsorted-table-body").html("");
 	AUTOCOMPLETE_TITLES = autocomplete_for_title;
@@ -325,12 +323,6 @@ function initAddExpensesTable(addExpenseUrl, xmlTreeUrl, autocomplete_for_title)
  */
 function ajaxSaveAllExpenses()
 {
-	if (! XML_EXPENSE_ADD_URL)
-	{
-		alert("Unable to find the url");
-		return;
-	}
-	
 	var expenses = ADD_EXPENSES_TABLE.find(".nonsorted-table-body .row");
 	for (var i = 0 ; i != expenses.length ; i++) {
 		var expense = $(expenses[i]);
@@ -346,12 +338,6 @@ function ajaxSaveAllExpenses()
  */
 function ajaxSaveNewExpense()
 {
-	if (! XML_EXPENSE_ADD_URL)
-	{
-		alert("Unable to find the url");
-		return;
-	}
-
 	var expense = $(this).parent().parent();
 	if (! expense.hasClass('expense-edit') && ! expense.hasClass('expense-fail'))
 	{
@@ -371,37 +357,38 @@ function ajaxSaveNewExpense()
 	
 	expense.removeClass('expense-edit');
 	expense.addClass('expense-wait');
-	$.ajax({
-		type: "post",
-		url: XML_EXPENSE_ADD_URL,
-		data:
-		{
-			_xsrf: getCookie("_xsrf"),
-			client_id: expense.attr('data-expense-identifier'),
-			title: expense_details['title'],
-			date: expense_details['date'],
-			price: expense_details['price'],
-			categories: categories,
-		},
-		dataType: "xml",
-		success: function(xml)
-		{
-			expense.removeClass('expense-wait');
-			expense.addClass('expense-success');
-			setTimeout(function() {
-				expense.remove();
-			}, 3000);
-		},
-		error: function(xhr)
-		{
-			expense.removeClass("expense-wait");
-			expense.addClass('expense-fail');
-			setTimeout(function() {
-				expense.removeClass("expense-fail");
-				expense.addClass('expense-edit');
-			}, 3000);
-			alert($(xhr.responseText).text());
-		}
-	});
+	
+	ws.send(
+			"add-expense",
+			{
+				client_id: expense.attr('data-expense-identifier'),
+				title: expense_details['title'],
+				date: expense_details['date'],
+				price: expense_details['price'],
+				categories: categories,
+			},
+			function(s, msg)
+			{
+				if (s == "success")
+				{
+					expense.removeClass('expense-wait');
+					expense.addClass('expense-success');
+					setTimeout(function() {
+						expense.remove();
+					}, 3000);
+					return true;
+				}
+				else if (s == "error")
+				{
+					expense.removeClass("expense-wait");
+					expense.addClass('expense-fail');
+					setTimeout(function() {
+						expense.removeClass("expense-fail");
+						expense.addClass('expense-edit');
+					}, 3000);
+					return false;
+				}
+				return false;
+			});
 }
 
