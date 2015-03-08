@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Logout{% end %}
+
+{% block content %}
+
+<div style="text-align: center;" id="logout">
+  {% if username %}
+    <div>Have a nice day {{ username }}.</div>
+    <div>You have been logout of MyMoney.</div>
+  {% else %}
+    <div>You are not logged.</div>
+  {% end %}
+  <div><a href="{{ reverse_url('login') }}"><span class="glyphicon glyphicon-off"></span> Login</a></div>
+</div>
+
+{% end %}
+

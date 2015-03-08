@@ -57,4 +57,5 @@ target/
 mymoney.db
 .*
 *.swp
+config.py
 

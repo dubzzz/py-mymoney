@@ -9,6 +9,7 @@ from tornado.web import RequestHandler, StaticFileHandler, Application, url
 
 import sys
 from os import path
+from config import COOKIE_SECRET
 
 __CURRENT_PATH = path.dirname(__file__)
 __CURRENT_ABSPATH = path.dirname(path.realpath(__file__))
@@ -19,16 +20,22 @@ sys.path.append(path.join(__CURRENT_PATH, "views", "utilities"))
 import uimodules
 
 sys.path.append(path.join(__CURRENT_PATH, "views"))
+from auth import LoginHandler, LogoutHandler
 from expenses import AddExpensesHandler, XmlAddExpenseHandler, XmlDeleteExpenseHandler, DisplayExpensesHandler, DisplayTreeExpensesHandler
 from nodes import ConfigureNodesHandler, XmlTreesHandler, XmlAddNodeHandler, XmlUpdateNodeHandler, XmlMoveNodeHandler
 
 # Define tornado application
 settings = {
+    "cookie_secret": COOKIE_SECRET,
+    "login_url": "/login",
     "template_path": __TEMPLATES_ABSPATH,
     "ui_modules": uimodules,
     "xsrf_cookies": True,
 }
 application = Application([
+    url(r"/", DisplayTreeExpensesHandler, name="home"),
+    url(r"/login", LoginHandler, name="login"),
+    url(r"/logout", LogoutHandler, name="logout"),
     url(r"/configure/nodes", ConfigureNodesHandler, name="configure_nodes"),
     url(r"/add/expenses", AddExpensesHandler, name="add_expenses"),
     url(r"/display/expenses", DisplayExpensesHandler, name="display_expenses"),
@@ -39,7 +46,7 @@ application = Application([
     url(r"/xml/delete/expense\.xml", XmlDeleteExpenseHandler, name="xml_delete_expense"),
     url(r"/xml/update/node\.xml", XmlUpdateNodeHandler, name="xml_update_node"),
     url(r"/xml/move/node\.xml", XmlMoveNodeHandler, name="xml_move_node"),
-    url(r'/static/(.*)', StaticFileHandler, {'path': __STATIC_ABSPATH}),
+    url(r"/static/(.*)", StaticFileHandler, {'path': __STATIC_ABSPATH}),
 ], **settings)
 
 if __name__ == "__main__":

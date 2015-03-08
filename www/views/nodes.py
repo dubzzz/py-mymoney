@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from tornado.web import RequestHandler
+from tornado.web import RequestHandler, authenticated
+from auth import BaseHandler
 import sqlite3
 
 import sys
@@ -17,7 +18,8 @@ from trees import Node, isInTree, getRootId, retrieveTrees
 
 # HTML Webpages
 
-class ConfigureNodesHandler(RequestHandler):
+class ConfigureNodesHandler(BaseHandler):
+    @authenticated
     def get(self):
         r"""
         Render the trees currently saved into the database,

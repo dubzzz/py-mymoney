@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-from tornado.web import RequestHandler
+from tornado.web import RequestHandler, authenticated
+from auth import BaseHandler
 import sqlite3
 
 from calendar import monthrange
@@ -19,7 +20,8 @@ from trees import getRootId, getPathToNodeFromTrees, retrieveTrees
 
 # HTML Webpages
 
-class AddExpensesHandler(RequestHandler):
+class AddExpensesHandler(BaseHandler):
+    @authenticated
     def get(self):
         r"""
         Form to give the ability to add several expenses
@@ -37,7 +39,8 @@ class AddExpensesHandler(RequestHandler):
 
         self.render("add_expenses.html", page="add_expenses", expenses=expenses)
 
-class DisplayExpensesHandler(RequestHandler):
+class DisplayExpensesHandler(BaseHandler):
+    @authenticated
     def get(self):
         r"""
         Table containing all the expenses already saved
@@ -69,7 +72,8 @@ class DisplayExpensesHandler(RequestHandler):
         self.xsrf_token
         self.render("display_expenses.html", page="display_expenses", expenses=expenses)
 
-class DisplayTreeExpensesHandler(RequestHandler):
+class DisplayTreeExpensesHandler(BaseHandler):
+    @authenticated
     def get(self):
         r"""
         Table containing all the expenses already saved

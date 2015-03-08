@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}{% end %} [MyMon€y]</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/jquery-ui/themes/base/all.css">
-    <link rel="stylesheet" href="/static/css/dashboard.css">
-    <link rel="stylesheet" href="/static/js-tools/css/sorted-table.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/jquery-ui/themes/base/all.css" />
+    <link rel="stylesheet" href="/static/css/dashboard.css" />
+    <link rel="stylesheet" href="/static/js-tools/css/sorted-table.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="/static/jquery-ui/ui/core.js"></script>
@@ -54,17 +54,17 @@
               <a href="{{ reverse_url('display_tree_expenses') }}">Expenses</a>
             </li>
             <li {% if page == "add_expenses" %}class="active"{% end %} title="Add new expenses">
-              <a href="{{ reverse_url('add_expenses') }}"><span class="glyphicon glyphicon-plus"></a>
+              <a href="{{ reverse_url('add_expenses') }}"><span class="glyphicon glyphicon-plus"></span></a>
             </li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          <li {% if page == "configure_nodes" %}class="active"{% end %} title="Configure tree">
-            <a href="{{ reverse_url('configure_nodes') }}"><span class="glyphicon glyphicon-wrench"></span></a>
-          </li>
-          <li title="Logout">
-            <a href="#"><span class="glyphicon glyphicon-off"></span></a>
-          </li>
-        </ul>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li {% if page == "configure_nodes" %}class="active"{% end %} title="Configure tree">
+              <a href="{{ reverse_url('configure_nodes') }}"><span class="glyphicon glyphicon-wrench"></span></a>
+            </li>
+            <li {% if page == "login" %}class="active"{% end %} title="Logout">
+            <a href="{{ reverse_url('logout') }}"><span class="glyphicon glyphicon-off"></span></a>
+            </li>
+          </ul>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
