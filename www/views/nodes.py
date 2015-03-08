@@ -31,7 +31,7 @@ class ConfigureNodesHandler(BaseHandler):
 
 # XML answers to AJAX queries
 
-class XmlAddNodeHandler(RequestHandler):
+class XmlAddNodeHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
     def post(self):
@@ -71,7 +71,7 @@ class XmlAddNodeHandler(RequestHandler):
             return
         raise404(self, 'Unhandled exception')
 
-class XmlUpdateNodeHandler(RequestHandler):
+class XmlUpdateNodeHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
     def post(self):
@@ -108,7 +108,7 @@ class XmlUpdateNodeHandler(RequestHandler):
             return
         raise404(self, 'Unhandled exception')
 
-class XmlMoveNodeHandler(RequestHandler):
+class XmlMoveNodeHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
     def post(self):
@@ -170,7 +170,7 @@ class XmlMoveNodeHandler(RequestHandler):
             return
         raise404(self, 'Unhandled exception')
 
-class XmlTreesHandler(RequestHandler):
+class XmlTreesHandler(BaseHandler):
     @xmlcontent
     def get(self):
         r"""

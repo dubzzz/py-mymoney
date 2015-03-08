@@ -6,6 +6,23 @@ from tornado.escape import xhtml_escape
 class ForbiddenOperationException(Exception):
     pass
 
+def xmlauthenticated(method):
+    r"""
+    Check authentification status
+    Must be wrapped by xmlcontent
+    """
+    
+    def inner(*args, **kwargs):
+        if args[0].current_user is None:
+            try:
+                raise404(args[0], "Access forbidden")
+            except ForbiddenOperationException as e:
+                pass
+            return
+        else:
+            return method(*args, **kwargs)
+    return inner
+
 def donotpropagate_forbidden_operation(method):
     r"""
     Decorate a post or get method for RequestHandler
@@ -31,6 +48,12 @@ def xmlcontent(method):
         if len(args) > 0 and isinstance(args[0], RequestHandler):
             request_handler = args[0]
             request_handler.set_header("Content-type", 'text/xml; charset="utf-8"')
+            if args[0].current_user is None:
+                try:
+                    raise404(args[0], "Access forbidden")
+                except ForbiddenOperationException as e:
+                    pass
+                return
         else:
             print("WARNING\txmlcontent only apply to decorate get or post methods of RequestHandler instances")
             print("       \tMethod:    %s" % (method.__name__,))

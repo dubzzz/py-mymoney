@@ -107,7 +107,7 @@ class DisplayTreeExpensesHandler(BaseHandler):
 
 # XML answers to AJAX queries
 
-class XmlAddExpenseHandler(RequestHandler):
+class XmlAddExpenseHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
     def post(self):
@@ -199,7 +199,7 @@ class XmlAddExpenseHandler(RequestHandler):
             return
         raise404(self, 'Unhandled exception')
 
-class XmlDeleteExpenseHandler(RequestHandler):
+class XmlDeleteExpenseHandler(BaseHandler):
     @xmlcontent
     @donotpropagate_forbidden_operation
     def post(self):
