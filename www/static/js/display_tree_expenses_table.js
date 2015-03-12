@@ -9,7 +9,7 @@ function HierarchyPriceItem(data) {
 
 	self.display = function() {
 		var language = window.navigator.userLanguage || window.navigator.language;
-		return data.toLocaleString(language, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
+		return self.data.toLocaleString(language, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " €";
 	};
 
 	self.aggregate = function(other) {
