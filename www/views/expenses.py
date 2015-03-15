@@ -126,12 +126,12 @@ def addExpense(msg):
         expense_client_id = -1
     
     try:
-        expense_title = msg["title"].decode('utf_8')
+        expense_title = msg["title"]
     except KeyError as e:
         raise ForbiddenOperationException('Malformed query: missing title')
     
     try:
-        expense_date_str = msg["date"].decode('utf_8')
+        expense_date_str = msg["date"]
     except KeyError as e:
         raise ForbiddenOperationException('Malformed query: missing date')
     m = re.match(r'^(\d{4})-(\d{1,2})-(\d{1,2})$', expense_date_str)
