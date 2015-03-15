@@ -140,7 +140,7 @@ function reactOnFilterCategories($input, choice) {
 	return false; //the choice can be displayed in the list
 }
 
-function reactOnSelectCategory($input, choice) {
+function appendCategory($input, id, parentid, title, htmlvalue) {
 	var $selection = $input.parent().find("ul.autocomplete-selection");
 	if ($selection.length == 0) {
 		$selection = $("<ul/>");
@@ -148,10 +148,10 @@ function reactOnSelectCategory($input, choice) {
 		$input.parent().append($selection);
 	}
 	var $elt_dom = $("<li/>");
-	$elt_dom.attr("data-id", choice['autocomplete_id']);
-	$elt_dom.attr("data-parent-id", choice['parent_id']);
-	$elt_dom.attr("title", choice['autocomplete_rawdata_on']);
-	$elt_dom.html(toSafeHtml(choice['autocomplete_rawdata_after']) + " &times;");
+	$elt_dom.attr("data-id", id);
+	$elt_dom.attr("data-parent-id", parentid);
+	$elt_dom.attr("title", title);
+	$elt_dom.html(htmlvalue);
 	$elt_dom.click(function() {
 		var $selection = $(this).parent();
 		$(this).remove();
@@ -162,11 +162,15 @@ function reactOnSelectCategory($input, choice) {
 	$selection.append($elt_dom);
 }
 
+function reactOnSelectCategory($input, choice) {
+	appendCategory($input, choice['autocomplete_id'], choice['parent_id'], choice['autocomplete_rawdata_on'], toSafeHtml(choice['autocomplete_rawdata_after']) + " &times;");
+}
+
 function reactOnSelectTitle($input, choice) {
 	$input.val(choice["autocomplete_rawdata_on"]);
 }
 
-function appendExpense() {
+function appendExpense($model) {
 	// Append an empty expense in the form
 	
 	LAST_EXPENSE_ID++;
@@ -250,6 +254,18 @@ function appendExpense() {
 	$send_img.attr("title", "Save this expense");
 	$send_img.click(ajaxSaveNewExpense);
 	$actions_cell.append($send_img);
+	var $clone_img = $("<span/>");
+	$clone_img.addClass("glyphicon glyphicon-repeat");
+	$clone_img.attr("style", "cursor:pointer;");
+	$clone_img.attr("title", "Clone");
+	$clone_img.click(function() {
+		var $expense = $(this).parent().parent();
+		var expense_details = isFilledExpense($expense);
+		if (expense_details) {
+			appendExpense($expense);
+		}
+	});
+	$actions_cell.append($clone_img);
 	$expense.append($actions_cell);
 	
 	var $cols = ADD_EXPENSES_TABLE.find(".nonsorted-table-header > .row:first-child > div");
@@ -258,6 +274,17 @@ function appendExpense() {
 	}
 
 	ADD_EXPENSES_TABLE.find(".nonsorted-table-body").append($expense);
+	
+	if ($model) {
+		$date_input.val($model.find('.date-input').val());
+		$title_input.val($model.find('.title-input').val());
+		$price_input.val($model.find('.price-input').val());
+		var $lis = $model.find(".categories-data ul.autocomplete-selection li");
+		for (var i = 0 ; i != $lis.length ; i++) {
+			var $li = $($lis[i]);
+			appendCategory($categories_input, $li.attr("data-id"), $li.attr("data-parent-id"), $li.attr("title"), $li.html());
+		}
+	}
 }
 
 function getTreeNodePath(node) {
