@@ -273,8 +273,12 @@ function appendExpense($model) {
 		$($expense.children()[i]).addClass($($cols[i]).attr("class"));
 	}
 
-	ADD_EXPENSES_TABLE.find(".nonsorted-table-body").append($expense);
-	
+	if ($model) {
+		$model.after($expense);
+	} else {
+		ADD_EXPENSES_TABLE.find(".nonsorted-table-body").append($expense);
+	}
+
 	if ($model) {
 		$date_input.val($model.find('.date-input').val());
 		$title_input.val($model.find('.title-input').val());
