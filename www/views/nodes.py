@@ -47,11 +47,11 @@ class XmlAddNodeHandler(BaseHandler):
         """
         
         try:
-            parent_id = int(self.request.arguments["parent_id"][0])
+            parent_id = int(self.request.arguments["parent_id"][0].decode('utf_8'))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             parent_id = None
         try:
-            node_title = self.request.arguments["title"][0]
+            node_title = self.request.arguments["title"][0].decode('utf_8')
         except (KeyError, IndexError) as e:
             raise404(self, 'Malformed query: missing title')
 
@@ -87,11 +87,11 @@ class XmlUpdateNodeHandler(BaseHandler):
         """
         
         try:
-            node_id = int(self.request.arguments["id"][0])
+            node_id = int(self.request.arguments["id"][0].decode('utf_8'))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise404(self, 'Malformed query: missing id')
         try:
-            node_title = self.request.arguments["title"][0]
+            node_title = self.request.arguments["title"][0].decode('utf_8')
         except (KeyError, IndexError) as e:
             raise404(self, 'Malformed query: missing title')
 
@@ -127,11 +127,11 @@ class XmlMoveNodeHandler(BaseHandler):
         """
         
         try:
-            node_id = int(self.request.arguments["id"][0])
+            node_id = int(self.request.arguments["id"][0].decode('utf_8'))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise404(self, 'Malformed query: missing id')
         try:
-            parent_id = int(self.request.arguments["parent_id"][0])
+            parent_id = int(self.request.arguments["parent_id"][0].decode('utf_8'))
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise404(self, 'Malformed query: missing parent_id')
 

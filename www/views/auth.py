@@ -17,23 +17,23 @@ class BaseHandler(RequestHandler):
 class LoginHandler(BaseHandler):
     def get(self):
         try:
-            nextpage = self.request.arguments["next"][0]
+            nextpage = self.request.arguments["next"][0].decode('utf_8')
         except (KeyError, IndexError) as e:
             nextpage = "/"
         self.render("login.html", page="login", nextpage=nextpage)
 
     def post(self):
         try:
-            nextpage = self.request.arguments["next"][0]
+            nextpage = self.request.arguments["next"][0].decode('utf_8')
         except (KeyError, IndexError) as e:
             nextpage = "/"
         try:
-            username = self.request.arguments["username"][0]
+            username = self.request.arguments["username"][0].decode('utf_8')
         except (KeyError, IndexError) as e:
             self.render("login.html", page="login", nextpage=nextpage)
             return
         try:
-            password = self.request.arguments["password"][0]
+            password = self.request.arguments["password"][0].decode('utf_8')
         except (KeyError, IndexError) as e:
             self.render("login.html", page="login", nextpage=nextpage)
             return
